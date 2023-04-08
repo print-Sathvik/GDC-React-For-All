@@ -1,0 +1,58 @@
+.inputSet input
+{
+  position: relative;
+  width: 100%;
+  padding: 20px 10px 10px;
+  background: transparent;
+  outline: none;
+  color: #23242a;
+  font-size: 1em;
+  z-index: 1;
+}
+.inputSet label
+{
+    position: absolute;
+    left: 0;
+    padding: 20px 10px 10px;
+    font-size: 1em;
+    color: #8f8f8f;
+    pointer-events: none;
+    letter-spacing: 0.05em;
+    transition: 0.5s;
+}
+.inputSet input:valid ~ label,
+.inputSet input:focus ~ label
+{
+    color: #45f3ff;
+    transform: translateX(0px) translateY(-34px);
+    font-size: 0.75em;
+}
+.inputSet i
+{
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: #45f3ff;
+    border-radius: 4px;
+    transition: 0.5s;
+    pointer-events: none;
+}
+.inputSet input:valid ~ i,
+.inputSet input:focus ~ i
+{
+    height: 44px;
+}
+input[type=date]:required:invalid::-webkit-datetime-edit {
+  color: transparent;
+}
+input[type=date]:focus::-webkit-datetime-edit {
+  color: black !important;
+}
+input[type=email]:required:invalid {
+  color: transparent;
+}
+input[type=email]:focus {
+  color: black !important;
+}
