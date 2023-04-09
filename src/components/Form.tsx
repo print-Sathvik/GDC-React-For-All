@@ -30,17 +30,18 @@ export default function Form(props: { closeFormCB: () => void }) {
   };
 
   const setFieldContent = (id: number, content: string) => {
-    let updateIndex: number = state.findIndex((field) => field.id === id);
-    let updateField = state[updateIndex];
-    updateField.value = content;
-    setState([
-      ...state.slice(0, updateIndex),
-      {
-        ...updateField,
-        value: content,
-      },
-      ...state.slice(updateIndex + 1),
-    ]);
+    setState(
+      state.map((field) =>
+        field.id === id
+          ? {
+              ...field,
+              value: content,
+            }
+          : {
+              ...field,
+            }
+      )
+    );
   };
 
   const reset = () => {
