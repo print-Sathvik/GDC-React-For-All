@@ -1,7 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FieldSet from "../FieldSet";
 
-const formFields = [
+interface formData {
+  title: string,
+  formFields: formField
+}
+
+interface formField {
+    id: number;
+    label: string;
+    type: string;
+    value: string;
+}
+
+const initialFormFields: formField[] = [
   { id: 1, label: "First Name", type: "text", value: "" },
   { id: 2, label: "Last Name", type: "text", value: "" },
   { id: 3, label: "Email", type: "email", value: "" },
@@ -9,11 +21,33 @@ const formFields = [
   { id: 5, label: "Phone Number", type: "tel", value: "" },
 ];
 
+const initialState:() => formField[] = () => {
+  const formFieldsJSON = localStorage.getItem("formField")
+  const persistantormFields = formFieldsJSON ? JSON.parse(formFieldsJSON) : initialFormFields
+  return persistantormFields;
+}
+
+const saveFormData = (currentState: formField[]) => {
+  localStorage.setItem("formFields", JSON.stringify(currentState))
+}
+
 export default function Form(props: { closeFormCB: () => void }) {
-  const [state, setState] = useState(formFields);
+  const [state, setState] = useState(initialState());
   const [newField, setNewField] = useState("");
+  useEffect(() => {
+    document.title = "Form Editor"
+
+    return () => {
+      document.title = "Home Page"
+    }
+  }, [])
+
+  useEffect(() => {
+    saveFormData(state)
+  }, [state])
+
   const addField = () => {
-    setState([
+    setState(state => [
       ...state,
       {
         id: Number(new Date()),
@@ -85,10 +119,10 @@ export default function Form(props: { closeFormCB: () => void }) {
       </div>
       <div className="text-center">
         <button
-          type="submit"
+          onClick={(_e) => saveFormData(state)}
           className="bg-blue-600 hover:bg-blue-800 text-white font-bold px-3 py-2 mt-4 mr-2 rounded"
         >
-          Submit
+          Save
         </button>
         <button
           className="bg-red-600 hover:bg-red-800 text-white font-bold p-2 mt-4 mx-2 rounded"
