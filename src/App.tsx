@@ -17,6 +17,7 @@ function App() {
   };
 
   return (
+    //The state can be "HOME" or id of the form which is passed to the Form component so that the required form is displayed
     <AppContainer>
       <div className="p-4 mx-auto max-w-lg bg-white shadow-lg rounded-xl">
         <Header title="React Forms" />

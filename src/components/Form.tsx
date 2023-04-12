@@ -29,6 +29,9 @@ const getLocalForms: () => formData[] = () => {
 };
 
 const initialState: (id: number) => formData = (id: number) => {
+  // when new form button is clicked this method creates a new formData object when it is
+  // found that form with the id required is not in the local storage.
+  // If there exists a form with given id(this happens when edit button is clicked), then that form is rendered
   const localForms = getLocalForms();
   const currentForm = localForms.find((form) => form.id === id);
   if (currentForm !== undefined) {
