@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import FieldSet from "../FieldSet";
+import { Link, navigate } from "raviger";
 
 interface formData {
   id: number;
@@ -39,13 +40,11 @@ const initialState: (id: number) => formData = (id: number) => {
     return currentForm;
   }
   const newForm = {
-    id: id,
+    id: Number(new Date()),
     title: "Untitled Form",
     formFields: initialFormFields,
   };
-  console.log(localForms.length);
   saveLocalForms([...localForms, newForm]);
-  console.log(localForms.length);
   return newForm;
 };
 
@@ -61,10 +60,16 @@ const saveFormData = (currentState: formData) => {
   saveLocalForms(updatedLocalForms);
 };
 
-function Form(props: { closeFormCB: () => void; id: number }) {
+function Form(props: { id: number }) {
   const [state, setState] = useState(() => initialState(props.id));
   const [newField, setNewField] = useState("");
   const titleRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    console.log("State:", state.id, "Props:", props.id);
+    state.id !== props.id && navigate(`/forms/${state.id}`);
+  }, [props.id, state.id]);
+
   useEffect(() => {
     document.title = "Form Editor";
     titleRef.current?.focus();
@@ -184,12 +189,12 @@ function Form(props: { closeFormCB: () => void; id: number }) {
         >
           Save
         </button>
-        <button
+        <Link
+          href="/"
           className="bg-red-600 hover:bg-red-800 text-white font-bold p-2 mt-4 mx-2 rounded"
-          onClick={props.closeFormCB}
         >
           Close Form
-        </button>
+        </Link>
         <button
           className="bg-red-600 hover:bg-red-800 text-white font-bold p-2 mt-4 ml-2 rounded"
           onClick={reset}
