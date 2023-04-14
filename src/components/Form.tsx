@@ -197,10 +197,22 @@ function Form(props: { id: number }) {
           }}
           className="h-fit p-2 my-4 flex-auto mx-2 border-2 border-gray-400 rounded"
         >
-          <option value="text">text</option>
-          <option value="date">date</option>
-          <option value="tel">tel</option>
-          <option value="url">url</option>
+          {[
+            "text",
+            "date",
+            "tel",
+            "url",
+            "color",
+            "password",
+            "radio",
+            "range",
+            "time",
+            "file",
+          ].map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
         </select>
         <button
           className="bg-yellow-500 hover:bg-yellow-800 text-white font-bold p-2 my-4 ml-2 rounded"
