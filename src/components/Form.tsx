@@ -36,7 +36,6 @@ const initialState: (id: number) => formData = (id: number) => {
   const localForms = getLocalForms();
   const currentForm = localForms.find((form) => form.id === id);
   if (currentForm !== undefined) {
-    console.log("Found it!!!");
     return currentForm;
   }
   const newForm = {
@@ -62,11 +61,10 @@ const saveFormData = (currentState: formData) => {
 
 function Form(props: { id: number }) {
   const [state, setState] = useState(() => initialState(props.id));
-  const [newField, setNewField] = useState("");
+  const [newField, setNewField] = useState({ label: "", type: "text" });
   const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    console.log("State:", state.id, "Props:", props.id);
     state.id !== props.id && navigate(`/forms/${state.id}`);
   }, [props.id, state.id]);
 
@@ -96,13 +94,13 @@ function Form(props: { id: number }) {
         ...state.formFields,
         {
           id: Number(new Date()),
-          label: newField,
-          type: "text",
+          label: newField.label,
+          type: newField.type,
           value: "",
         },
       ],
     });
-    setNewField("");
+    setNewField({ label: "", type: "text" });
   };
 
   const removeField = (id: number) => {
@@ -120,6 +118,22 @@ function Form(props: { id: number }) {
           ? {
               ...field,
               value: content,
+            }
+          : {
+              ...field,
+            }
+      ),
+    });
+  };
+
+  const setLabelContent = (id: number, content: string) => {
+    setState({
+      ...state,
+      formFields: state.formFields.map((field) =>
+        field.id === id
+          ? {
+              ...field,
+              label: content,
             }
           : {
               ...field,
@@ -162,6 +176,7 @@ function Form(props: { id: number }) {
             label={field.label}
             value={field.value}
             setFieldContentCB={setFieldContent}
+            setLabelContentCB={setLabelContent}
             removeFieldCB={removeField}
           />
         ))}
@@ -169,12 +184,24 @@ function Form(props: { id: number }) {
       <div className="flex">
         <input
           type="text"
-          value={newField}
-          className="border-2 border-gray-400 rounded p-2 my-4 flex-1"
+          value={newField.label}
+          placeholder="New Field"
+          className="border-2 border-gray-400 rounded p-2 my-4 flex-auto"
           onChange={(e) => {
-            setNewField(e.target.value);
+            setNewField({ label: e.target.value, type: newField.type });
           }}
         />
+        <select
+          onChange={(e) => {
+            setNewField({ label: newField.label, type: e.target.value });
+          }}
+          className="h-fit p-2 my-4 flex-auto mx-2 border-2 border-gray-400 rounded"
+        >
+          <option value="text">text</option>
+          <option value="date">date</option>
+          <option value="tel">tel</option>
+          <option value="url">url</option>
+        </select>
         <button
           className="bg-yellow-500 hover:bg-yellow-800 text-white font-bold p-2 my-4 ml-2 rounded"
           onClick={addField}
@@ -206,5 +233,6 @@ function Form(props: { id: number }) {
   );
 }
 
-export type { formData };
+export type { formData, formField };
 export default Form;
+export { getLocalForms, saveFormData };
