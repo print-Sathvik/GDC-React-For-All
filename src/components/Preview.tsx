@@ -114,17 +114,20 @@ export default function Preview(props: { id: number }) {
 
   if (typeof state === "undefined") {
     return <div className="text-center">No Form exists at this URL</div>;
+  } else if (state.formFields.length === 0) {
+    return <div className="text-center">Nothing to fill!! Empty Form</div>;
   }
   return (
     <div>
       <h1 className="text-center font-bold">{state.title}</h1>
+      {state.currentFieldIndex <= state.formFields.length - 1 ? (
       <FieldSet
         id={state.formFields[state.currentFieldIndex].id}
         type={state.formFields[state.currentFieldIndex].type}
         label={state.formFields[state.currentFieldIndex].label}
         value={state.formFields[state.currentFieldIndex].value}
         setFieldContentCB={setFieldContent}
-      />
+      />) : (<div className="text-center p-2 my-4">You have reached the end of this form</div>)}
       <div>
         {state.currentFieldIndex !== 0 && (
           <button
@@ -152,7 +155,7 @@ export default function Preview(props: { id: number }) {
             </svg>
           </button>
         )}
-        {state.currentFieldIndex !== state.formFields.length - 1 && (
+        {state.currentFieldIndex <= state.formFields.length - 1 && (
           <button
             onClick={() =>
               setState({
