@@ -100,7 +100,7 @@ function Form(props: { id: number }) {
         },
       ],
     });
-    setNewField({ label: "", type: "text" });
+    setNewField({ label: "", type: newField.type });
   };
 
   const removeField = (id: number) => {
