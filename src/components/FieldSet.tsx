@@ -11,7 +11,7 @@ export default function FieldSet(props: {
 }) {
   return (
     //This Component has an input field along with its label
-    <div key={props.id} className="inputSet relative w-full mt-[30px]">
+    <div key={props.id} className="relative w-full mt-[30px]">
       <div className="flex">
         <input
           type={props.type}
@@ -33,7 +33,7 @@ export default function FieldSet(props: {
               props.setLabelContentCB &&
               props.setLabelContentCB(props.id, e.target.value)
             }
-            className="absolute left-0 bottom-3 z-[1] text-[#8f8f8f] pt-1 px-2.5 m-0 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500"
+            className="absolute left-0 bottom-3 max-w-fit z-[1] text-[#8f8f8f] pt-1 px-2.5 m-0 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500"
           />
         ) : (
           <label className="absolute left-0 text-[#8f8f8f] pt-5 px-2.5 pb-2.5 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500">

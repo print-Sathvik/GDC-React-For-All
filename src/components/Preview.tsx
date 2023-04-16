@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { formField, getLocalForms, saveFormData } from "./Form";
-import FieldSet from "../FieldSet";
+import FieldSet from "./FieldSet";
+import DropDown from "./DropDown";
+import RadioGroup from "./RadioGroup";
 
 interface previewFormData {
   id: number;
@@ -114,17 +116,64 @@ export default function Preview(props: { id: number }) {
 
   if (typeof state === "undefined") {
     return <div className="text-center">No Form exists at this URL</div>;
+  } else if (state.formFields.length === 0) {
+    return <div className="text-center">Nothing to fill!! Empty Form</div>;
   }
+
+  const renderField = () => {
+    const field = state.formFields[state.currentFieldIndex];
+    switch (field.kind) {
+      case "text":
+        return (
+          <FieldSet
+            id={field.id}
+            type={field.fieldType}
+            label={field.label}
+            value={field.value}
+            setFieldContentCB={setFieldContent}
+          />
+        );
+      case "dropdown":
+        return (
+          field.kind === "dropdown" && (
+            <DropDown
+              id={field.id}
+              key={field.id}
+              fieldType={field.fieldType}
+              label={field.label}
+              value={field.value}
+              options={field.options}
+              setFieldContentCB={setFieldContent}
+            />
+          )
+        );
+        case "radio":
+          return (
+            field.kind === "radio" && (
+              <RadioGroup
+                id={field.id}
+                key={field.id}
+                fieldType={field.fieldType}
+                label={field.label}
+                value={field.value}
+                options={field.options}
+                setFieldContentCB={setFieldContent}
+              />
+            )
+          );
+    }
+  };
+
   return (
     <div>
       <h1 className="text-center font-bold">{state.title}</h1>
-      <FieldSet
-        id={state.formFields[state.currentFieldIndex].id}
-        type={state.formFields[state.currentFieldIndex].type}
-        label={state.formFields[state.currentFieldIndex].label}
-        value={state.formFields[state.currentFieldIndex].value}
-        setFieldContentCB={setFieldContent}
-      />
+      {state.currentFieldIndex <= state.formFields.length - 1 ? (
+        renderField()
+      ) : (
+        <div className="text-center p-2 my-4">
+          You have reached the end of this form
+        </div>
+      )}
       <div>
         {state.currentFieldIndex !== 0 && (
           <button
@@ -152,7 +201,7 @@ export default function Preview(props: { id: number }) {
             </svg>
           </button>
         )}
-        {state.currentFieldIndex !== state.formFields.length - 1 && (
+        {state.currentFieldIndex <= state.formFields.length - 1 && (
           <button
             onClick={() =>
               setState({
