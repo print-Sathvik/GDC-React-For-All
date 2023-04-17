@@ -1,32 +1,34 @@
 import React from "react";
 import { textFieldType } from "../types/formTypes";
 
-export default function RadioGroup(props: {
+export default function Multi(props: {
   id: number;
   label: string;
   fieldType: textFieldType;
   options: string[];
   value: string;
+  selected: number[];
   setFieldContentCB?: (id: number, content: string) => void;
   setLabelContentCB?: (id: number, content: string) => void;
   removeFieldCB?: (id: number) => void;
   showOptionsCB?: (id: number) => void;
 }) {
   return (
-    //This Component has set of radio buttons along with its label
+    //This Component has set of Multiselect label and it options
     <div key={props.id} onClick={() => {
       props.showOptionsCB && props.showOptionsCB(props.id);
     }}
     className="inputSet relative w-full mt-[30px]">
       <div>
         {props.setLabelContentCB ? (
-          <><input
-            type="text"
-            value={props.label}
-            onChange={(e) => props.setLabelContentCB &&
-              props.setLabelContentCB(props.id, e.target.value)}
-            className="absolute left-0 bottom-3 w-3/12 z-[1] text-[#8f8f8f] pt-1 px-2.5 m-0 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500" /><i className="peer-focus:h-11 peer-valid:h-11 absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff] duration-500"></i></>
-
+            <div>
+            <input
+                type="text"
+                value={props.label}
+                onChange={(e) => props.setLabelContentCB &&
+                props.setLabelContentCB(props.id, e.target.value)}
+                className="absolute left-0 bottom-3 w-3/12 z-[1] text-[#8f8f8f] pt-1 px-2.5 m-0 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500" /><i className="peer-focus:h-11 peer-valid:h-11 absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff] duration-500"></i>
+            </div>
         ) : (
           <p className="absolute left-0 -top-10 text-[#8f8f8f] px-2.5 pb-2.5 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500">
             {props.label}
