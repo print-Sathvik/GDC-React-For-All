@@ -14,19 +14,27 @@ export default function RadioGroup(props: {
 }) {
   return (
     //This Component has set of radio buttons along with its label
-    <div key={props.id} onClick={() => {
-      props.showOptionsCB && props.showOptionsCB(props.id);
-    }}
-    className="inputSet relative w-full mt-[30px]">
+    <div
+      key={props.id}
+      onClick={() => {
+        props.showOptionsCB && props.showOptionsCB(props.id);
+      }}
+      className="inputSet relative w-full mt-[30px]"
+    >
       <div>
         {props.setLabelContentCB ? (
-          <><input
-            type="text"
-            value={props.label}
-            onChange={(e) => props.setLabelContentCB &&
-              props.setLabelContentCB(props.id, e.target.value)}
-            className="absolute left-0 bottom-3 w-3/12 z-[1] text-[#8f8f8f] pt-1 px-2.5 m-0 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500" /><i className="peer-focus:h-11 peer-valid:h-11 absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff] duration-500"></i></>
-
+          <>
+            <input
+              type="text"
+              value={props.label}
+              onChange={(e) =>
+                props.setLabelContentCB &&
+                props.setLabelContentCB(props.id, e.target.value)
+              }
+              className="absolute left-0 bottom-3 w-3/12 z-[1] text-[#8f8f8f] pt-1 px-2.5 m-0 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500"
+            />
+            <i className="peer-focus:h-11 peer-valid:h-11 absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff] duration-500"></i>
+          </>
         ) : (
           <p className="absolute left-0 -top-10 text-[#8f8f8f] px-2.5 pb-2.5 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500">
             {props.label}
@@ -58,10 +66,23 @@ export default function RadioGroup(props: {
             <p className="pt-5 float-right">{props.fieldType}</p>
           </div>
         ) : (
-          props.options.map((option, ind) => <div key={ind}>
-            <input type="radio" name={String(props.id)} id={String(ind)} value={option} defaultChecked={option === props.value} onChange={(e) => props.setFieldContentCB && props.setFieldContentCB(props.id, e.target.value)} className="w-4 h-4 text-[#45f3ff] bg-gray-100 border-gray-300 focus:ring-[#45f3ff] dark:focus:ring-[#45f3ff] dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 duration-500" />
-            <label htmlFor={String(ind)}>{option}</label>
-            </div>)
+          props.options.map((option, ind) => (
+            <div key={ind}>
+              <input
+                type="radio"
+                name={String(props.id)}
+                id={String(ind)}
+                value={option}
+                defaultChecked={option === props.value}
+                onChange={(e) =>
+                  props.setFieldContentCB &&
+                  props.setFieldContentCB(props.id, e.target.value)
+                }
+                className="w-4 h-4 text-[#45f3ff] bg-gray-100 border-gray-300 focus:ring-[#45f3ff] dark:focus:ring-[#45f3ff] dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 duration-500"
+              />
+              <label htmlFor={String(ind)}>{option}</label>
+            </div>
+          ))
         )}
       </div>
     </div>

@@ -3,6 +3,8 @@ import { formField, getLocalForms, saveFormData } from "./Form";
 import FieldSet from "./FieldSet";
 import DropDown from "./DropDown";
 import RadioGroup from "./RadioGroup";
+import MultiSelect from "./MultiSelect";
+import TextArea from "./TextArea";
 
 interface previewFormData {
   id: number;
@@ -14,7 +16,7 @@ interface previewFormData {
 //Answers are stored as an array of answerSetType where each answerSetType belongs to a form
 interface answerSetType {
   formId: number;
-  answers: { fieldId: number; answer: string }[];
+  answers: { fieldId: number; answer: string | number[] }[];
 }
 
 const initialState: (id: number) => previewFormData | undefined = (id) => {
@@ -38,7 +40,7 @@ const initialAnswersState: (
     //Creating and Saving a new answerSet for current form if it does not exist in localStorage
     const answers = formState.formFields.map((field) => ({
       fieldId: field.id,
-      answer: "",
+      answer: field.kind === "multiselect" ? [] : "",
     }));
     saveAnswersData({ formId: formState.id, answers });
     return { formId: formState.id, answers };
@@ -114,6 +116,49 @@ export default function Preview(props: { id: number }) {
       });
   };
 
+  const setMultiSelectContent = (id: number, ind: number) => {
+    //this method will handle the change in multiselect element
+    //The selected attribute stores indices of options selected
+    state &&
+      setState({
+        ...state,
+        formFields: state?.formFields.map((field) =>
+          field.id === id && field.kind === "multiselect"
+            ? {
+                ...field,
+                selected: field.selected.includes(ind)
+                  ? field.selected.filter((optionIndex) => optionIndex !== ind)
+                  : [...field.selected, ind],
+                //If option is already stored the remove it(clickig on selected option means unselecting the option),
+                //or else store it
+              }
+            : {
+                ...field,
+              }
+        ),
+      });
+
+    state &&
+      answersState &&
+      setAnswersState({
+        ...answersState,
+        answers: answersState.answers.map((answerAndId) =>
+          answerAndId.fieldId ===
+            state.formFields[state.currentFieldIndex].id &&
+          typeof answerAndId.answer === "object"
+            ? {
+                ...answerAndId,
+                answer: answerAndId.answer.includes(ind)
+                  ? answerAndId.answer.filter(
+                      (optionIndex) => optionIndex !== ind
+                    )
+                  : [...answerAndId.answer, ind],
+              }
+            : answerAndId
+        ),
+      });
+  };
+
   if (typeof state === "undefined") {
     return <div className="text-center">No Form exists at this URL</div>;
   } else if (state.formFields.length === 0) {
@@ -147,20 +192,47 @@ export default function Preview(props: { id: number }) {
             />
           )
         );
-        case "radio":
-          return (
-            field.kind === "radio" && (
-              <RadioGroup
-                id={field.id}
-                key={field.id}
-                fieldType={field.fieldType}
-                label={field.label}
-                value={field.value}
-                options={field.options}
-                setFieldContentCB={setFieldContent}
-              />
-            )
-          );
+      case "radio":
+        return (
+          field.kind === "radio" && (
+            <RadioGroup
+              id={field.id}
+              key={field.id}
+              fieldType={field.fieldType}
+              label={field.label}
+              value={field.value}
+              options={field.options}
+              setFieldContentCB={setFieldContent}
+            />
+          )
+        );
+      case "multiselect":
+        return (
+          field.kind === "multiselect" && (
+            <MultiSelect
+              id={field.id}
+              key={field.id}
+              fieldType={field.fieldType}
+              label={field.label}
+              value={field.value}
+              options={field.options}
+              selected={field.selected}
+              setMultiSelectContentCB={setMultiSelectContent}
+            />
+          )
+        );
+      case "textarea":
+        return (
+          field.kind === "textarea" && (
+            <TextArea
+              id={field.id}
+              type={field.fieldType}
+              label={field.label}
+              value={field.value}
+              setFieldContentCB={setFieldContent}
+            />
+          )
+        );
     }
   };
 

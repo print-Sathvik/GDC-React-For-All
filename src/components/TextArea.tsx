@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function FieldSet(props: {
+export default function TextArea(props: {
   id: number;
   type: string;
   label: string;
@@ -13,19 +13,17 @@ export default function FieldSet(props: {
     //This Component has an input field along with its label
     <div key={props.id} className="relative w-full mt-[30px]">
       <div className="flex">
-        <input
-          type={props.type}
+        <textarea
           required={true}
-          //disabling input field if setLabelContent prop is absent because it is present only when editing form,
-          //and absent while answering the form in preview mode
           disabled={props.setLabelContentCB ? true : false}
-          value={props.setLabelContentCB ? "" : props.value}
+          value={props.value}
           onChange={(e) =>
             props.setFieldContentCB &&
             props.setFieldContentCB(props.id, e.target.value)
           }
+          rows={props.setLabelContentCB ? 1 : 4}
           className="peer relative w-full pt-5 px-2.5 pb-2.5 bg-transparent outline-none z-[1] invalid:text-transparent focus:text-black duration-500 flex-1"
-        />
+        ></textarea>
         {/*If we don't need to set the label content, it means we are in preview mode. So in preview mode I am using
         label and in edit mode I am using input fields to display the label content*/}
         {props.setLabelContentCB ? (
@@ -39,11 +37,11 @@ export default function FieldSet(props: {
             className="absolute left-0 bottom-3 max-w-fit z-[1] text-[#8f8f8f] pt-1 px-2.5 m-0 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500"
           />
         ) : (
-          <label className="absolute left-0 text-[#8f8f8f] pt-5 px-2.5 pb-2.5 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500">
+          <label className="absolute left-0 -top-2 text-[#8f8f8f] pt-5 px-2.5 pb-2.5 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500">
             {props.label}
           </label>
         )}
-        <i className="peer-focus:h-11 peer-valid:h-11 absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff] duration-500"></i>
+        <i className="peer-focus:h-full peer-valid:h-full absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff] duration-500"></i>
         {props.setLabelContentCB && (
           <div className="flex">
             <p className="pt-5">{props.type}</p>

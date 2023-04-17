@@ -20,10 +20,14 @@ export default function DropDown(props: {
 
   return (
     //This Component has an dropdown field along with its label
-    <div key={props.id} className="inputSet relative w-full mt-[30px]" onClick={() => {
-      props.showOptionsCB && props.showOptionsCB(props.id);
-      props.showOptionsCB && hideDefaultList();
-    }}>
+    <div
+      key={props.id}
+      className="inputSet relative w-full mt-[30px]"
+      onClick={() => {
+        props.showOptionsCB && props.showOptionsCB(props.id);
+        props.showOptionsCB && hideDefaultList();
+      }}
+    >
       <div className="flex">
         <select
           required={true}

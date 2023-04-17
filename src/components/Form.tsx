@@ -5,6 +5,7 @@ import { formData, formField, textFieldType } from "../types/formTypes";
 import DropDown from "./DropDown";
 import RadioGroup from "./RadioGroup";
 import MultiSelect from "./MultiSelect";
+import TextArea from "./TextArea";
 
 const initialFormFields: formField[] = [
   { kind: "text", id: 1, label: "First Name", fieldType: "text", value: "" },
@@ -98,7 +99,7 @@ function Form(props: { id: number }) {
             fieldType: newField.type,
             value: "",
           },
-        ]
+        ];
       case "dropdown":
         return [
           ...state.formFields,
@@ -110,7 +111,7 @@ function Form(props: { id: number }) {
             options: [],
             value: "",
           },
-        ]
+        ];
       case "radio":
         return [
           ...state.formFields,
@@ -122,7 +123,7 @@ function Form(props: { id: number }) {
             options: [],
             value: "",
           },
-        ]
+        ];
       case "multiselect":
         return [
           ...state.formFields,
@@ -133,10 +134,20 @@ function Form(props: { id: number }) {
             fieldType: newField.type,
             options: [],
             value: "",
-            selected: []
+            selected: [],
           },
-        ]
-    
+        ];
+      case "textarea":
+        return [
+          ...state.formFields,
+          {
+            kind: "textarea",
+            id: Number(new Date()),
+            label: newField.label,
+            fieldType: newField.type,
+            value: "",
+          },
+        ];
       default:
         return [
           ...state.formFields,
@@ -147,14 +158,14 @@ function Form(props: { id: number }) {
             fieldType: newField.type,
             value: "",
           },
-        ]
+        ];
     }
-  }
+  };
 
   const addField = () => {
     setState({
       ...state,
-      formFields: getNewFormFields(newField.type)
+      formFields: getNewFormFields(newField.type),
     });
     setNewField({ label: "", type: newField.type });
   };
@@ -163,22 +174,6 @@ function Form(props: { id: number }) {
     setState({
       ...state,
       formFields: state.formFields.filter((field) => field.id !== id),
-    });
-  };
-
-  const setFieldContent = (id: number, content: string) => {
-    setState({
-      ...state,
-      formFields: state.formFields.map((field) =>
-        field.id === id
-          ? {
-              ...field,
-              value: content,
-            }
-          : {
-              ...field,
-            }
-      ),
     });
   };
 
@@ -212,7 +207,10 @@ function Form(props: { id: number }) {
     setState({
       ...state,
       formFields: state.formFields.map((field) =>
-        field.id === id && (field.kind === "dropdown" || field.kind === "radio" || field.kind === "multiselect")
+        field.id === id &&
+        (field.kind === "dropdown" ||
+          field.kind === "radio" ||
+          field.kind === "multiselect")
           ? {
               ...field,
               options: [...field.options, ""],
@@ -232,7 +230,10 @@ function Form(props: { id: number }) {
     setState({
       ...state,
       formFields: state.formFields.map((field) =>
-        field.id === id && (field.kind === "dropdown" || field.kind === "radio" || field.kind === "multiselect")
+        field.id === id &&
+        (field.kind === "dropdown" ||
+          field.kind === "radio" ||
+          field.kind === "multiselect")
           ? {
               ...field,
               options: field.options.map((option, index) =>
@@ -250,7 +251,10 @@ function Form(props: { id: number }) {
     setState({
       ...state,
       formFields: state.formFields.map((field) =>
-        field.id === id && (field.kind === "dropdown" || field.kind === "radio" || field.kind === "multiselect")
+        field.id === id &&
+        (field.kind === "dropdown" ||
+          field.kind === "radio" ||
+          field.kind === "multiselect")
           ? {
               ...field,
               options: field.options.filter((option, index) => ind !== index),
@@ -292,7 +296,6 @@ function Form(props: { id: number }) {
                   type={field.fieldType}
                   label={field.label}
                   value={field.value}
-                  setFieldContentCB={setFieldContent}
                   setLabelContentCB={setLabelContent}
                   removeFieldCB={removeField}
                 />
@@ -313,7 +316,10 @@ function Form(props: { id: number }) {
                       showOptionsCB={showOptions}
                     />
                     <button
-                      onClick={() => {createEmptyOption(field.id); setExpandedElement(field.id)}}
+                      onClick={() => {
+                        createEmptyOption(field.id);
+                        setExpandedElement(field.id);
+                      }}
                       className="bg-blue-600 hover:bg-blue-800 text-white font-bold p-2 mt-10 mr-2 flex-1 h-fit text-center rounded"
                     >
                       New
@@ -375,7 +381,10 @@ function Form(props: { id: number }) {
                       showOptionsCB={showOptions}
                     />
                     <button
-                      onClick={() => {createEmptyOption(field.id); setExpandedElement(field.id)}}
+                      onClick={() => {
+                        createEmptyOption(field.id);
+                        setExpandedElement(field.id);
+                      }}
                       className="bg-blue-600 hover:bg-blue-800 text-white font-bold p-2 mt-10 mr-2 flex-1 h-fit text-center rounded"
                     >
                       New
@@ -388,7 +397,11 @@ function Form(props: { id: number }) {
                         className="flex relative left-10 mt-[30px] w-1/2"
                         key={ind}
                       >
-                        <input type="radio" name={String(field.id)} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                        <input
+                          type="radio"
+                          name={String(field.id)}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
                         <input
                           type="text"
                           placeholder={`Option ${ind + 1}`}
@@ -423,71 +436,85 @@ function Form(props: { id: number }) {
                     ))}
                 </div>
               );
-              case "multiselect":
-                return (
-                  <div key={field.id}>
-                    <div className="flex">
-                      <MultiSelect
-                        id={field.id}
-                        key={field.id}
-                        fieldType={field.fieldType}
-                        label={field.label}
-                        value=""
-                        selected={field.selected}
-                        options={field.options}
-                        setLabelContentCB={setLabelContent}
-                        removeFieldCB={removeField}
-                        showOptionsCB={showOptions}
-                      />
-                      <button
-                        onClick={() => {createEmptyOption(field.id); setExpandedElement(field.id)}}
-                        className="bg-blue-600 hover:bg-blue-800 text-white font-bold p-2 mt-10 mr-2 flex-1 h-fit text-center rounded"
-                      >
-                        New
-                      </button>
-                    </div>
-                    {/*This part displays the options on clicking on multiselect in file edit mode*/}
-                    {expandedElement === field.id &&
-                      field.options.map((option, ind) => (
-                        <div
-                          className="flex relative left-10 mt-[30px] w-1/2"
-                          key={ind}
-                        >
-                          <input type="checkbox" name={String(field.id)} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                          <input
-                            type="text"
-                            placeholder={`Option ${ind + 1}`}
-                            required={true}
-                            value={option}
-                            onChange={(e) =>
-                              setOption(field.id, ind, e.target.value)
-                            }
-                            className="peer relative w-full px-2.5 bg-transparent outline-none z-[1] focus:text-black flex-1"
-                          />
-                          <button
-                            className="z-[1] hidden peer-hover:block peer-focus:block pb-1"
-                            onClick={() => deleteOption(field.id, ind)}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth="1.2"
-                              stroke="red"
-                              className="w-5 h-5"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                              />
-                            </svg>
-                          </button>
-                          <i className="absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff]"></i>
-                        </div>
-                      ))}
+            case "multiselect":
+              return (
+                <div key={field.id}>
+                  <div className="flex">
+                    <MultiSelect
+                      id={field.id}
+                      key={field.id}
+                      fieldType={field.fieldType}
+                      label={field.label}
+                      value=""
+                      selected={field.selected}
+                      options={field.options}
+                      setLabelContentCB={setLabelContent}
+                      removeFieldCB={removeField}
+                      showOptionsCB={showOptions}
+                    />
+                    <button
+                      onClick={() => {
+                        createEmptyOption(field.id);
+                        setExpandedElement(field.id);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-800 text-white font-bold p-2 mt-10 mr-2 flex-1 h-fit text-center rounded"
+                    >
+                      New
+                    </button>
                   </div>
-                );
+                  {/*This part displays the options on clicking on multiselect in file edit mode*/}
+                  {expandedElement === field.id &&
+                    field.options.map((option, ind) => (
+                      <div
+                        className="flex relative left-10 mt-[30px] w-1/2"
+                        key={ind}
+                      >
+                        <input
+                          type="text"
+                          placeholder={`Option ${ind + 1}`}
+                          required={true}
+                          value={option}
+                          onChange={(e) =>
+                            setOption(field.id, ind, e.target.value)
+                          }
+                          className="peer relative w-full px-2.5 bg-transparent outline-none z-[1] focus:text-black flex-1"
+                        />
+                        <button
+                          className="z-[1] hidden peer-hover:block peer-focus:block pb-1"
+                          onClick={() => deleteOption(field.id, ind)}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.2"
+                            stroke="red"
+                            className="w-5 h-5"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                            />
+                          </svg>
+                        </button>
+                        <i className="absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff]"></i>
+                      </div>
+                    ))}
+                </div>
+              );
+            case "textarea":
+              return (
+                <TextArea
+                  id={field.id}
+                  key={field.id}
+                  type={field.fieldType}
+                  label={field.label}
+                  value={field.value}
+                  setLabelContentCB={setLabelContent}
+                  removeFieldCB={removeField}
+                />
+              );
             default:
               return <div>No such field exists</div>;
           }
@@ -516,13 +543,13 @@ function Form(props: { id: number }) {
           {[
             "text",
             "date",
-            "tel",
             "dropdown",
-            "url",
-            "color",
-            "password",
             "radio",
             "multiselect",
+            "textarea",
+            "password",
+            "tel",
+            "url",
             "range",
             "time",
             "file",

@@ -13,7 +13,10 @@ type textFieldType =
   | "url"
   | "password"
   | "dropdown"
-  | "radio" | "checkbox" | "multiselect";
+  | "radio"
+  | "checkbox"
+  | "multiselect"
+  | "textarea";
 
 type TextField = {
   kind: "text";
@@ -48,9 +51,30 @@ type MultiSelect = {
   fieldType: textFieldType;
   options: string[];
   value: string;
-  selected: number[]
+  selected: number[]; //stores indices of options selected
 };
 
-type formField = TextField | DropdownField | RadioGroup | MultiSelect;
+type TextArea = {
+  kind: "textarea";
+  id: number;
+  label: string;
+  fieldType: textFieldType;
+  value: string;
+};
 
-export type { textFieldType, formField, formData, TextField, DropdownField, RadioGroup, MultiSelect };
+type formField =
+  | TextField
+  | DropdownField
+  | RadioGroup
+  | MultiSelect
+  | TextArea;
+
+export type {
+  textFieldType,
+  formField,
+  formData,
+  TextField,
+  DropdownField,
+  RadioGroup,
+  MultiSelect,
+};
