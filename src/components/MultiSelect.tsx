@@ -17,14 +17,12 @@ export default function Multi(props: {
   const [chosenOptions, setChosenOptionsState] = useState(() =>
     props.options
       .filter((option, ind) => props.selected.includes(ind))
-      .join("; ")
   );
 
   useEffect(() => {
     setChosenOptionsState(
       props.options
         .filter((option, ind) => props.selected.includes(ind))
-        .join("; ")
     );
   }, [props.options, props.selected]);
 
@@ -101,12 +99,11 @@ export default function Multi(props: {
               onClick={(_) => setExpandedState(!expanded)}
               className="flex w-full border-2 border-black rounded"
             >
-              <input
-                type="text"
-                disabled={true}
-                value={chosenOptions}
-                className="p-2 flex-1"
-              />
+              <div className="p-2 flex-1 flex">
+                {chosenOptions.map((option, ind) => <div className="bg-[#45f3ff] px-2 py-1 m-1 rounded-3xl flex-grow-0" key={ind}>
+                  {option}
+                </div>)}
+              </div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-10 w-10 float-right pt-2 rounded"
@@ -140,11 +137,11 @@ export default function Multi(props: {
                             Number(e.target.id)
                           );
                       }}
-                      className="peer w-4 h-4 text-[#45f3ff] bg-gray-100 border-gray-300 focus:ring-[#45f3ff] dark:focus:ring-[#45f3ff] dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 duration-500"
+                      className="peer w-4 h-4 text-[#45f3ff] bg-gray-100 border-gray-300 focus:ring-[#45f3ff]"
                     />
                     <label
                       htmlFor={String(ind)}
-                      className="text-base peer-checked:bg-[#45f3ff] cursor-pointer px-4 py-2 hover:bg-gray-100 w-full inline-block"
+                      className="text-base peer-checked:bg-[#45f3ff] cursor-pointer px-4 py-2 hover:bg-gray-300 w-full inline-block"
                     >
                       {option}
                     </label>

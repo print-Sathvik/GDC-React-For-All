@@ -70,10 +70,15 @@ const saveAnswersData = (currentState: answerSetType) => {
 
 export default function Preview(props: { id: number }) {
   // Setting the state to index of first field
+  //And setting answer state to null initially.
+  //If url has correct form id, then state will not be undefined and the answer state will
+  //then be set to the answerSetType data
   const [state, setState] = useState(() => initialState(props.id));
-  const [answersState, setAnswersState] = useState(
-    () => state && initialAnswersState(props.id, state)
-  );
+  const [answersState, setAnswersState] = useState<null | answerSetType>(null);
+
+  useEffect(() => {
+    state && setAnswersState(initialAnswersState(props.id, state))
+  }, [state, props.id])
 
   useEffect(() => {
     let timeout = setTimeout(() => {
@@ -239,13 +244,15 @@ export default function Preview(props: { id: number }) {
   return (
     <div>
       <h1 className="text-center font-bold">{state.title}</h1>
-      {state.currentFieldIndex <= state.formFields.length - 1 ? (
-        renderField()
-      ) : (
-        <div className="text-center p-2 my-4">
-          You have reached the end of this form
-        </div>
-      )}
+      <div>
+        {state.currentFieldIndex <= state.formFields.length - 1 ? (
+          renderField()
+        ) : (
+          <div className="text-center p-2 my-4">
+            You have reached the end of this form
+          </div>
+        )}
+      </div>
       <div>
         {state.currentFieldIndex !== 0 && (
           <button

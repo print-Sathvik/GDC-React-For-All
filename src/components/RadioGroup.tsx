@@ -36,7 +36,7 @@ export default function RadioGroup(props: {
             <i className="peer-focus:h-11 peer-valid:h-11 absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff] duration-500"></i>
           </>
         ) : (
-          <p className="absolute left-0 -top-10 text-[#8f8f8f] px-2.5 pb-2.5 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500">
+          <p className="absolute left-0 -top-10 px-2.5 pb-2.5 ml-4 mt-2 text-[#45f3ff] duration-500">
             {props.label}
           </p>
         )}
@@ -54,7 +54,7 @@ export default function RadioGroup(props: {
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
                 stroke="red"
-                className="w-6 h-6"
+                className="w-6 h-6 float-right"
               >
                 <path
                   strokeLinecap="round"
@@ -64,10 +64,24 @@ export default function RadioGroup(props: {
               </svg>
             </button>
             <p className="pt-5 float-right">{props.fieldType}</p>
+              <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-8 w-8 float-right pt-2 rounded"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
           </div>
         ) : (
           props.options.map((option, ind) => (
-            <div key={ind}>
+            <div key={ind} className="ml-4 py-1">
               <input
                 type="radio"
                 name={String(props.id)}
@@ -78,9 +92,9 @@ export default function RadioGroup(props: {
                   props.setFieldContentCB &&
                   props.setFieldContentCB(props.id, e.target.value)
                 }
-                className="w-4 h-4 text-[#45f3ff] bg-gray-100 border-gray-300 focus:ring-[#45f3ff] dark:focus:ring-[#45f3ff] dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 duration-500"
+                className="w-4 h-4 p-2 text-[#45f3ff] bg-gray-100 border-gray-300 focus:ring-[#45f3ff] dark:focus:ring-[#45f3ff] dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 duration-500"
               />
-              <label htmlFor={String(ind)}>{option}</label>
+              <label htmlFor={String(ind)} className="cursor-pointer px-2">{option}</label>
             </div>
           ))
         )}
