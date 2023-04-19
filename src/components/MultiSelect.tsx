@@ -15,14 +15,12 @@ export default function Multi(props: {
 }) {
   const [expanded, setExpandedState] = useState(false);
   const [chosenOptions, setChosenOptionsState] = useState(() =>
-    props.options
-      .filter((option, ind) => props.selected.includes(ind))
+    props.options.filter((option, ind) => props.selected.includes(ind))
   );
 
   useEffect(() => {
     setChosenOptionsState(
-      props.options
-        .filter((option, ind) => props.selected.includes(ind))
+      props.options.filter((option, ind) => props.selected.includes(ind))
     );
   }, [props.options, props.selected]);
 
@@ -99,25 +97,47 @@ export default function Multi(props: {
               onClick={(_) => setExpandedState(!expanded)}
               className="flex w-full border-2 border-black rounded"
             >
-              <div className="p-2 flex-1 flex">
-                {chosenOptions.map((option, ind) => <div className="bg-[#45f3ff] px-2 py-1 m-1 rounded-3xl flex-grow-0" key={ind}>
-                  {option}
-                </div>)}
+              <div className="p-2 flex-1">
+                {chosenOptions.map((option, ind) => (
+                  <div
+                    className="bg-[#45f3ff] px-2 py-1 m-1 rounded-3xl inline-flex"
+                    key={ind}
+                  >
+                    {option}
+                  </div>
+                ))}
               </div>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-10 w-10 float-right pt-2 rounded"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
+              {expanded ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  className="w-10 h-10 float-right pt-2 rounded"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4.5 15.75l7.5-7.5 7.5 7.5"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-10 h-10 float-right pt-2 rounded"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                  />
+                </svg>
+              )}
             </div>
             <div className="bg-white rounded-lg shadow-md w-full h-fit">
               {expanded &&

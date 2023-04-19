@@ -64,7 +64,7 @@ export default function RadioGroup(props: {
               </svg>
             </button>
             <p className="pt-5 float-right">{props.fieldType}</p>
-              <svg
+            <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-8 w-8 float-right pt-2 rounded"
               fill="none"
@@ -94,7 +94,9 @@ export default function RadioGroup(props: {
                 }
                 className="w-4 h-4 p-2 text-[#45f3ff] bg-gray-100 border-gray-300 focus:ring-[#45f3ff] dark:focus:ring-[#45f3ff] dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 duration-500"
               />
-              <label htmlFor={String(ind)} className="cursor-pointer px-2">{option}</label>
+              <label htmlFor={String(ind)} className="cursor-pointer px-2">
+                {option}
+              </label>
             </div>
           ))
         )}

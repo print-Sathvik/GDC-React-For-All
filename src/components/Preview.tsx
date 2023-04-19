@@ -77,8 +77,8 @@ export default function Preview(props: { id: number }) {
   const [answersState, setAnswersState] = useState<null | answerSetType>(null);
 
   useEffect(() => {
-    state && setAnswersState(initialAnswersState(props.id, state))
-  }, [state, props.id])
+    state && setAnswersState(initialAnswersState(props.id, state));
+  }, [state, props.id]);
 
   useEffect(() => {
     let timeout = setTimeout(() => {
