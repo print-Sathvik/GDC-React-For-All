@@ -1,28 +1,17 @@
-import { useState, useEffect } from "react";
-import { formField, getLocalForms, saveFormData } from "./Form";
+import { useEffect, useReducer } from "react";
+import { getLocalForms, saveFormData } from "./Form";
 import FieldSet from "./FieldSet";
 import DropDown from "./DropDown";
 import RadioGroup from "./RadioGroup";
 import MultiSelect from "./MultiSelect";
 import TextArea from "./TextArea";
+import { AnswerAction, PreviewAction } from "../types/actionTypes";
+import { answerSetType, previewFormData } from "../types/formTypes";
 
-interface previewFormData {
-  id: number;
-  title: string;
-  currentFieldIndex: number;
-  formFields: formField[];
-}
-
-//Answers are stored as an array of answerSetType where each answerSetType belongs to a form
-interface answerSetType {
-  formId: number;
-  answers: { fieldId: number; answer: string | number[] }[];
-}
-
-const initialState: (id: number) => previewFormData | undefined = (id) => {
+const initialState: (id: number) => previewFormData | null = (id) => {
   const form = getLocalForms().find((form) => form.id === id);
   if (form === undefined) {
-    return undefined;
+    return null;
   }
   return { ...form, currentFieldIndex: 0 };
 };
@@ -68,17 +57,111 @@ const saveAnswersData = (currentState: answerSetType) => {
   localStorage.setItem("savedAnswers", JSON.stringify(updatedAnswers));
 };
 
+const reducer: (
+  state: previewFormData | null,
+  action: PreviewAction
+) => previewFormData | null = (state, action) => {
+  if (state === null) return null;
+  switch (action.type) {
+    case "update_label":
+      return {
+        ...state,
+        formFields: state?.formFields.map((field) =>
+          field.id === action.id
+            ? {
+                ...field,
+                value: action.content,
+              }
+            : {
+                ...field,
+              }
+        ),
+      };
+    case "update_multiselect":
+      return {
+        ...state,
+        formFields: state?.formFields.map((field) =>
+          field.id === action.id && field.kind === "multiselect"
+            ? {
+                ...field,
+                selected: field.selected.includes(action.index)
+                  ? field.selected.filter(
+                      (optionIndex) => optionIndex !== action.index
+                    )
+                  : [...field.selected, action.index],
+                //If option is already stored the remove it(clickig on selected option means unselecting the option),
+                //or else store it
+              }
+            : {
+                ...field,
+              }
+        ),
+      };
+    case "prev_question":
+      return {
+        ...state,
+        currentFieldIndex: state.currentFieldIndex - 1,
+      };
+    case "next_question":
+      return {
+        ...state,
+        currentFieldIndex: state.currentFieldIndex + 1,
+      };
+  }
+};
+
+const answersReducer: (
+  answersState: answerSetType | null,
+  action: AnswerAction
+) => answerSetType | null = (answersState, action) => {
+  if (answersState === null) return null;
+  switch (action.type) {
+    case "answer_value":
+      return {
+        ...answersState,
+        answers: answersState.answers.map((answerAndId) =>
+          answerAndId.fieldId ===
+          action.formState.formFields[action.formState.currentFieldIndex].id
+            ? { ...answerAndId, answer: action.content }
+            : answerAndId
+        ),
+      };
+    case "answer_multiselect":
+      return {
+        ...answersState,
+        answers: answersState.answers.map((answerAndId) =>
+          answerAndId.fieldId ===
+            action.formState.formFields[action.formState.currentFieldIndex]
+              .id && typeof answerAndId.answer === "object"
+            ? {
+                ...answerAndId,
+                answer: answerAndId.answer.includes(action.index)
+                  ? answerAndId.answer.filter(
+                      (optionIndex) => optionIndex !== action.index
+                    )
+                  : [...answerAndId.answer, action.index],
+              }
+            : answerAndId
+        ),
+      };
+  }
+};
+
 export default function Preview(props: { id: number }) {
   // Setting the state to index of first field
   //And setting answer state to null initially.
   //If url has correct form id, then state will not be undefined and the answer state will
   //then be set to the answerSetType data
-  const [state, setState] = useState(() => initialState(props.id));
-  const [answersState, setAnswersState] = useState<null | answerSetType>(null);
-
-  useEffect(() => {
-    state && setAnswersState(initialAnswersState(props.id, state))
-  }, [state, props.id])
+  const [state, dispatch] = useReducer(reducer, null, () =>
+    initialState(props.id)
+  );
+  const [answersState, dispatchAnswer] = useReducer(
+    answersReducer,
+    null,
+    () => {
+      return state ? initialAnswersState(props.id, state) : null;
+    }
+  );
 
   useEffect(() => {
     let timeout = setTimeout(() => {
@@ -91,80 +174,7 @@ export default function Preview(props: { id: number }) {
     };
   }, [state, answersState]);
 
-  const setFieldContent = (id: number, content: string) => {
-    //if state is not null(url is correct) this will handle the content change in the input fields
-    //that is it will update answersState
-    state &&
-      setState({
-        ...state,
-        formFields: state?.formFields.map((field) =>
-          field.id === id
-            ? {
-                ...field,
-                value: content,
-              }
-            : {
-                ...field,
-              }
-        ),
-      });
-
-    state &&
-      answersState &&
-      setAnswersState({
-        ...answersState,
-        answers: answersState.answers.map((answerAndId) =>
-          answerAndId.fieldId === state.formFields[state.currentFieldIndex].id
-            ? { ...answerAndId, answer: content }
-            : answerAndId
-        ),
-      });
-  };
-
-  const setMultiSelectContent = (id: number, ind: number) => {
-    //this method will handle the change in multiselect element
-    //The selected attribute stores indices of options selected
-    state &&
-      setState({
-        ...state,
-        formFields: state?.formFields.map((field) =>
-          field.id === id && field.kind === "multiselect"
-            ? {
-                ...field,
-                selected: field.selected.includes(ind)
-                  ? field.selected.filter((optionIndex) => optionIndex !== ind)
-                  : [...field.selected, ind],
-                //If option is already stored the remove it(clickig on selected option means unselecting the option),
-                //or else store it
-              }
-            : {
-                ...field,
-              }
-        ),
-      });
-
-    state &&
-      answersState &&
-      setAnswersState({
-        ...answersState,
-        answers: answersState.answers.map((answerAndId) =>
-          answerAndId.fieldId ===
-            state.formFields[state.currentFieldIndex].id &&
-          typeof answerAndId.answer === "object"
-            ? {
-                ...answerAndId,
-                answer: answerAndId.answer.includes(ind)
-                  ? answerAndId.answer.filter(
-                      (optionIndex) => optionIndex !== ind
-                    )
-                  : [...answerAndId.answer, ind],
-              }
-            : answerAndId
-        ),
-      });
-  };
-
-  if (typeof state === "undefined") {
+  if (state === null) {
     return <div className="text-center">No Form exists at this URL</div>;
   } else if (state.formFields.length === 0) {
     return <div className="text-center">Nothing to fill!! Empty Form</div>;
@@ -180,7 +190,15 @@ export default function Preview(props: { id: number }) {
             type={field.fieldType}
             label={field.label}
             value={field.value}
-            setFieldContentCB={setFieldContent}
+            setFieldContentCB={(id, content) => {
+              dispatch({ type: "update_label", id: id, content: content });
+              dispatchAnswer({
+                type: "answer_value",
+                id: id,
+                content: content,
+                formState: state,
+              });
+            }}
           />
         );
       case "dropdown":
@@ -193,7 +211,15 @@ export default function Preview(props: { id: number }) {
               label={field.label}
               value={field.value}
               options={field.options}
-              setFieldContentCB={setFieldContent}
+              setFieldContentCB={(id, content) => {
+                dispatch({ type: "update_label", id: id, content: content });
+                dispatchAnswer({
+                  type: "answer_value",
+                  id: id,
+                  content: content,
+                  formState: state,
+                });
+              }}
             />
           )
         );
@@ -207,7 +233,15 @@ export default function Preview(props: { id: number }) {
               label={field.label}
               value={field.value}
               options={field.options}
-              setFieldContentCB={setFieldContent}
+              setFieldContentCB={(id, content) => {
+                dispatch({ type: "update_label", id: id, content: content });
+                dispatchAnswer({
+                  type: "answer_value",
+                  id: id,
+                  content: content,
+                  formState: state,
+                });
+              }}
             />
           )
         );
@@ -222,7 +256,15 @@ export default function Preview(props: { id: number }) {
               value={field.value}
               options={field.options}
               selected={field.selected}
-              setMultiSelectContentCB={setMultiSelectContent}
+              setMultiSelectContentCB={(id, ind) => {
+                dispatch({ type: "update_multiselect", id: id, index: ind });
+                dispatchAnswer({
+                  type: "answer_multiselect",
+                  id: id,
+                  index: ind,
+                  formState: state,
+                });
+              }}
             />
           )
         );
@@ -234,7 +276,15 @@ export default function Preview(props: { id: number }) {
               type={field.fieldType}
               label={field.label}
               value={field.value}
-              setFieldContentCB={setFieldContent}
+              setFieldContentCB={(id, content) => {
+                dispatch({ type: "update_label", id: id, content: content });
+                dispatchAnswer({
+                  type: "answer_value",
+                  id: id,
+                  content: content,
+                  formState: state,
+                });
+              }}
             />
           )
         );
@@ -256,12 +306,7 @@ export default function Preview(props: { id: number }) {
       <div>
         {state.currentFieldIndex !== 0 && (
           <button
-            onClick={() =>
-              setState({
-                ...state,
-                currentFieldIndex: state.currentFieldIndex - 1,
-              })
-            }
+            onClick={() => dispatch({ type: "prev_question" })}
             className="p-2 m-2"
           >
             <svg
@@ -282,12 +327,7 @@ export default function Preview(props: { id: number }) {
         )}
         {state.currentFieldIndex <= state.formFields.length - 1 && (
           <button
-            onClick={() =>
-              setState({
-                ...state,
-                currentFieldIndex: state.currentFieldIndex + 1,
-              })
-            }
+            onClick={() => dispatch({ type: "next_question" })}
             className="p-2 m-2 text-end float-right"
           >
             <svg

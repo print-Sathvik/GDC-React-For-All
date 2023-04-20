@@ -1,11 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useReducer } from "react";
 import FieldSet from "./FieldSet";
 import { Link, navigate } from "raviger";
-import { formData, formField, textFieldType } from "../types/formTypes";
+import {
+  formData,
+  formField,
+  newFieldType,
+  textFieldType,
+} from "../types/formTypes";
 import DropDown from "./DropDown";
 import RadioGroup from "./RadioGroup";
 import MultiSelect from "./MultiSelect";
 import TextArea from "./TextArea";
+import { FormAction, NewFieldActions } from "../types/actionTypes";
 
 const initialFormFields: formField[] = [
   { kind: "text", id: 1, label: "First Name", fieldType: "text", value: "" },
@@ -51,13 +57,177 @@ const saveFormData = (currentState: formData) => {
   saveLocalForms(updatedLocalForms);
 };
 
+const newFieldReducer = (
+  state: newFieldType,
+  action: NewFieldActions
+): newFieldType => {
+  switch (action.type) {
+    case "change_text":
+      return { label: action.value.label, type: state.type };
+    case "clear_text":
+      return { label: "", type: state.type };
+    case "change_type":
+      return { label: state.label, type: action.value.type };
+    default:
+      return { label: "", type: "text" };
+  }
+};
+
+const getNewFormFields: (type: textFieldType, label: string) => formField = (
+  type,
+  label
+) => {
+  switch (type) {
+    case "text":
+      return {
+        kind: "text",
+        id: Number(new Date()),
+        label: label,
+        fieldType: type,
+        value: "",
+      };
+    case "dropdown":
+      return {
+        kind: type as "dropdown",
+        id: Number(new Date()),
+        label: label,
+        fieldType: type,
+        options: [],
+        value: "",
+      };
+    case "radio":
+      return {
+        kind: type as "radio",
+        id: Number(new Date()),
+        label: label,
+        fieldType: type,
+        options: [],
+        value: "",
+      };
+    case "multiselect":
+      return {
+        kind: type as "multiselect",
+        id: Number(new Date()),
+        label: label,
+        fieldType: type,
+        options: [],
+        value: "",
+        selected: [],
+      };
+    case "textarea":
+      return {
+        kind: "textarea",
+        id: Number(new Date()),
+        label: label,
+        fieldType: type,
+        value: "",
+      };
+    default:
+      return {
+        kind: "text",
+        id: Number(new Date()),
+        label: label,
+        fieldType: type,
+        value: "",
+      };
+  }
+};
+
+const reducer = (state: formData, action: FormAction) => {
+  switch (action.type) {
+    case "add_field":
+      const newFormField = getNewFormFields(action.kind, action.label);
+      action.callback();
+      if (newFormField.label.length === 0) {
+        return state;
+      }
+      return { ...state, formFields: [...state.formFields, newFormField] };
+    case "remove_field":
+      return {
+        ...state,
+        formFields: state.formFields.filter((field) => field.id !== action.id),
+      };
+    case "update_title":
+      return { ...state, title: action.title };
+    case "update_label":
+      return {
+        ...state,
+        formFields: state.formFields.map((field) =>
+          field.id === action.id
+            ? {
+                ...field,
+                label: action.content,
+              }
+            : {
+                ...field,
+              }
+        ),
+      };
+    case "add_option":
+      return {
+        ...state,
+        formFields: state.formFields.map((field) =>
+          field.id === action.id &&
+          (field.kind === "dropdown" ||
+            field.kind === "radio" ||
+            field.kind === "multiselect")
+            ? {
+                ...field,
+                options: [...field.options, ""],
+              }
+            : {
+                ...field,
+              }
+        ),
+      };
+    case "remove_option":
+      return {
+        ...state,
+        formFields: state.formFields.map((field) =>
+          field.id === action.id &&
+          (field.kind === "dropdown" ||
+            field.kind === "radio" ||
+            field.kind === "multiselect")
+            ? {
+                ...field,
+                options: field.options.filter(
+                  (option, index) => action.index !== index
+                ),
+              }
+            : { ...field }
+        ),
+      };
+    case "update_option":
+      return {
+        ...state,
+        formFields: state.formFields.map((field) =>
+          field.id === action.id &&
+          (field.kind === "dropdown" ||
+            field.kind === "radio" ||
+            field.kind === "multiselect")
+            ? {
+                ...field,
+                options: field.options.map((option, index) =>
+                  action.index === index ? action.content : option
+                ),
+              }
+            : {
+                ...field,
+              }
+        ),
+      };
+  }
+};
+
 function Form(props: { id: number }) {
-  const [state, setState] = useState(() => initialState(props.id));
-  const defaultNewField: { label: string; type: textFieldType } = {
+  const [state, dispatchForm] = useReducer(reducer, null, () =>
+    initialState(props.id)
+  );
+  const defaultNewField: newFieldType = {
     label: "",
     type: "text",
   };
-  const [newField, setNewField] = useState(() => defaultNewField);
+  const [newField, dispatch] = useReducer(newFieldReducer, defaultNewField);
   //This will hold the id of the element which is expanded in the form
   //Elements like deopdown, radio button group, multiselect, can be expanded to see/edit options while creating form
   //Only 1 element can be expanded
@@ -87,182 +257,9 @@ function Form(props: { id: number }) {
     };
   }, [state]);
 
-  const getNewFormFields: (type: textFieldType) => formField[] = (type) => {
-    switch (type) {
-      case "text":
-        return [
-          ...state.formFields,
-          {
-            kind: "text",
-            id: Number(new Date()),
-            label: newField.label,
-            fieldType: newField.type,
-            value: "",
-          },
-        ];
-      case "dropdown":
-        return [
-          ...state.formFields,
-          {
-            kind: newField.type as "dropdown",
-            id: Number(new Date()),
-            label: newField.label,
-            fieldType: newField.type,
-            options: [],
-            value: "",
-          },
-        ];
-      case "radio":
-        return [
-          ...state.formFields,
-          {
-            kind: newField.type as "radio",
-            id: Number(new Date()),
-            label: newField.label,
-            fieldType: newField.type,
-            options: [],
-            value: "",
-          },
-        ];
-      case "multiselect":
-        return [
-          ...state.formFields,
-          {
-            kind: newField.type as "radio",
-            id: Number(new Date()),
-            label: newField.label,
-            fieldType: newField.type,
-            options: [],
-            value: "",
-            selected: [],
-          },
-        ];
-      case "textarea":
-        return [
-          ...state.formFields,
-          {
-            kind: "textarea",
-            id: Number(new Date()),
-            label: newField.label,
-            fieldType: newField.type,
-            value: "",
-          },
-        ];
-      default:
-        return [
-          ...state.formFields,
-          {
-            kind: "text",
-            id: Number(new Date()),
-            label: newField.label,
-            fieldType: newField.type,
-            value: "",
-          },
-        ];
-    }
-  };
-
-  const addField = () => {
-    setState({
-      ...state,
-      formFields: getNewFormFields(newField.type),
-    });
-    setNewField({ label: "", type: newField.type });
-  };
-
-  const removeField = (id: number) => {
-    setState({
-      ...state,
-      formFields: state.formFields.filter((field) => field.id !== id),
-    });
-  };
-
-  const setLabelContent = (id: number, content: string) => {
-    setState({
-      ...state,
-      formFields: state.formFields.map((field) =>
-        field.id === id
-          ? {
-              ...field,
-              label: content,
-            }
-          : {
-              ...field,
-            }
-      ),
-    });
-  };
-
-  const reset = () => {
-    setState({
-      ...state,
-      formFields: state.formFields.map((field) => ({
-        ...field,
-        value: "",
-      })),
-    });
-  };
-
-  const createEmptyOption: (id: number) => void = (id) => {
-    setState({
-      ...state,
-      formFields: state.formFields.map((field) =>
-        field.id === id &&
-        (field.kind === "dropdown" ||
-          field.kind === "radio" ||
-          field.kind === "multiselect")
-          ? {
-              ...field,
-              options: [...field.options, ""],
-            }
-          : {
-              ...field,
-            }
-      ),
-    });
-  };
-
-  const setOption: (id: number, ind: number, content: string) => void = (
-    id,
-    ind,
-    content
-  ) => {
-    setState({
-      ...state,
-      formFields: state.formFields.map((field) =>
-        field.id === id &&
-        (field.kind === "dropdown" ||
-          field.kind === "radio" ||
-          field.kind === "multiselect")
-          ? {
-              ...field,
-              options: field.options.map((option, index) =>
-                ind === index ? content : option
-              ),
-            }
-          : {
-              ...field,
-            }
-      ),
-    });
-  };
-
-  const deleteOption: (id: number, ind: number) => void = (id, ind) => {
-    setState({
-      ...state,
-      formFields: state.formFields.map((field) =>
-        field.id === id &&
-        (field.kind === "dropdown" ||
-          field.kind === "radio" ||
-          field.kind === "multiselect")
-          ? {
-              ...field,
-              options: field.options.filter((option, index) => ind !== index),
-            }
-          : { ...field }
-      ),
-    });
-  };
+  // const dispatchForm = (action: FormAction) => {
+  //   setState(prevState => reducer(prevState, action))
+  // }
 
   const showOptions: (id: number) => void = (id) => {
     //If same element is clicked close it if its open, if different element is clicked, then open that element
@@ -278,7 +275,9 @@ function Form(props: { id: number }) {
             required={true}
             value={state.title}
             ref={titleRef}
-            onChange={(e) => setState({ ...state, title: e.target.value })}
+            onChange={(e) =>
+              dispatchForm({ type: "update_title", title: e.target.value })
+            }
             className="peer relative w-full pt-5 px-2.5 pb-2.5 bg-transparent outline-none z-[1] invalid:text-transparent focus:text-black duration-500 flex-1"
           />
           <label className="absolute left-0 text-[#8f8f8f] pt-5 px-2.5 pb-2.5 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500">
@@ -296,8 +295,16 @@ function Form(props: { id: number }) {
                   type={field.fieldType}
                   label={field.label}
                   value={field.value}
-                  setLabelContentCB={setLabelContent}
-                  removeFieldCB={removeField}
+                  setLabelContentCB={(id, content) =>
+                    dispatchForm({
+                      type: "update_label",
+                      id: id,
+                      content: content,
+                    })
+                  }
+                  removeFieldCB={(id) =>
+                    dispatchForm({ type: "remove_field", id: id })
+                  }
                 />
               );
             case "dropdown":
@@ -311,13 +318,21 @@ function Form(props: { id: number }) {
                       label={field.label}
                       value=""
                       options={field.options}
-                      setLabelContentCB={setLabelContent}
-                      removeFieldCB={removeField}
+                      setLabelContentCB={(id, content) =>
+                        dispatchForm({
+                          type: "update_label",
+                          id: id,
+                          content: content,
+                        })
+                      }
+                      removeFieldCB={(id) =>
+                        dispatchForm({ type: "remove_field", id: id })
+                      }
                       showOptionsCB={showOptions}
                     />
                     <button
                       onClick={() => {
-                        createEmptyOption(field.id);
+                        dispatchForm({ type: "add_option", id: field.id });
                         setExpandedElement(field.id);
                       }}
                       className="bg-blue-600 hover:bg-blue-800 text-white font-bold p-2 mt-10 mr-2 flex-1 h-fit text-center rounded"
@@ -337,13 +352,24 @@ function Form(props: { id: number }) {
                           required={true}
                           value={option}
                           onChange={(e) =>
-                            setOption(field.id, ind, e.target.value)
+                            dispatchForm({
+                              type: "update_option",
+                              id: field.id,
+                              index: ind,
+                              content: e.target.value,
+                            })
                           }
                           className="peer relative w-full px-2.5 bg-transparent outline-none z-[1] focus:text-black flex-1"
                         />
                         <button
                           className="z-[1] hidden pb-1 peer-hover:block peer-focus:block hover:block focus:block"
-                          onClick={() => field && deleteOption(field.id, ind)}
+                          onClick={() =>
+                            dispatchForm({
+                              type: "remove_option",
+                              id: field.id,
+                              index: ind,
+                            })
+                          }
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -376,13 +402,21 @@ function Form(props: { id: number }) {
                       label={field.label}
                       value=""
                       options={field.options}
-                      setLabelContentCB={setLabelContent}
-                      removeFieldCB={removeField}
+                      setLabelContentCB={(id, content) =>
+                        dispatchForm({
+                          type: "update_label",
+                          id: id,
+                          content: content,
+                        })
+                      }
+                      removeFieldCB={(id) =>
+                        dispatchForm({ type: "remove_field", id: id })
+                      }
                       showOptionsCB={showOptions}
                     />
                     <button
                       onClick={() => {
-                        createEmptyOption(field.id);
+                        dispatchForm({ type: "add_option", id: field.id });
                         setExpandedElement(field.id);
                       }}
                       className="bg-blue-600 hover:bg-blue-800 text-white font-bold p-2 mt-10 mr-2 flex-1 h-fit text-center rounded"
@@ -408,13 +442,24 @@ function Form(props: { id: number }) {
                           required={true}
                           value={option}
                           onChange={(e) =>
-                            setOption(field.id, ind, e.target.value)
+                            dispatchForm({
+                              type: "update_option",
+                              id: field.id,
+                              index: ind,
+                              content: e.target.value,
+                            })
                           }
                           className="peer relative w-full px-2.5 bg-transparent outline-none z-[1] focus:text-black flex-1"
                         />
                         <button
                           className="z-[1] hidden peer-hover:block peer-focus:block pb-1"
-                          onClick={() => deleteOption(field.id, ind)}
+                          onClick={() =>
+                            dispatchForm({
+                              type: "remove_option",
+                              id: field.id,
+                              index: ind,
+                            })
+                          }
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -448,13 +493,21 @@ function Form(props: { id: number }) {
                       value=""
                       selected={field.selected}
                       options={field.options}
-                      setLabelContentCB={setLabelContent}
-                      removeFieldCB={removeField}
+                      setLabelContentCB={(id, content) =>
+                        dispatchForm({
+                          type: "update_label",
+                          id: id,
+                          content: content,
+                        })
+                      }
+                      removeFieldCB={(id) =>
+                        dispatchForm({ type: "remove_field", id: id })
+                      }
                       showOptionsCB={showOptions}
                     />
                     <button
                       onClick={() => {
-                        createEmptyOption(field.id);
+                        dispatchForm({ type: "add_option", id: field.id });
                         setExpandedElement(field.id);
                       }}
                       className="bg-blue-600 hover:bg-blue-800 text-white font-bold p-2 mt-10 mr-2 flex-1 h-fit text-center rounded"
@@ -475,13 +528,24 @@ function Form(props: { id: number }) {
                           required={true}
                           value={option}
                           onChange={(e) =>
-                            setOption(field.id, ind, e.target.value)
+                            dispatchForm({
+                              type: "update_option",
+                              id: field.id,
+                              index: ind,
+                              content: e.target.value,
+                            })
                           }
                           className="peer relative w-full px-2.5 bg-transparent outline-none z-[1] focus:text-black flex-1"
                         />
                         <button
                           className="z-[1] hidden peer-hover:block peer-focus:block pb-1"
-                          onClick={() => deleteOption(field.id, ind)}
+                          onClick={() =>
+                            dispatchForm({
+                              type: "remove_option",
+                              id: field.id,
+                              index: ind,
+                            })
+                          }
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -511,8 +575,16 @@ function Form(props: { id: number }) {
                   type={field.fieldType}
                   label={field.label}
                   value={field.value}
-                  setLabelContentCB={setLabelContent}
-                  removeFieldCB={removeField}
+                  setLabelContentCB={(id, content) =>
+                    dispatchForm({
+                      type: "update_label",
+                      id: id,
+                      content: content,
+                    })
+                  }
+                  removeFieldCB={(id) =>
+                    dispatchForm({ type: "remove_field", id: id })
+                  }
                 />
               );
             default:
@@ -527,15 +599,21 @@ function Form(props: { id: number }) {
           placeholder="New Field"
           className="border-2 border-gray-400 rounded p-2 my-4 flex-grow w-5/12"
           onChange={(e) => {
-            setNewField({ label: e.target.value, type: newField.type });
+            dispatch({
+              type: "change_text",
+              value: { label: e.target.value, type: newField.type },
+            });
           }}
         />
         <select
           value={newField.type}
           onChange={(e) => {
-            setNewField({
-              label: newField.label,
-              type: e.target.value as textFieldType,
+            dispatch({
+              type: "change_type",
+              value: {
+                label: newField.label,
+                type: e.target.value as textFieldType,
+              },
             });
           }}
           className="h-fit p-2 my-4 flex-shrink mx-2 border-2 border-gray-400 rounded"
@@ -561,7 +639,14 @@ function Form(props: { id: number }) {
         </select>
         <button
           className="bg-yellow-500 hover:bg-yellow-800 flex-shrink text-white font-bold p-2 my-4 ml-2 rounded"
-          onClick={addField}
+          onClick={(_) =>
+            dispatchForm({
+              type: "add_field",
+              label: newField.label,
+              kind: newField.type,
+              callback: () => dispatch({ type: "clear_text" }),
+            })
+          }
         >
           Add Field
         </button>
@@ -579,12 +664,6 @@ function Form(props: { id: number }) {
         >
           Close Form
         </Link>
-        <button
-          className="bg-red-600 hover:bg-red-800 text-white font-bold p-2 mt-4 ml-2 rounded"
-          onClick={reset}
-        >
-          Clear
-        </button>
       </div>
     </div>
   );

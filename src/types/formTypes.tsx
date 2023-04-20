@@ -69,12 +69,30 @@ type formField =
   | MultiSelect
   | TextArea;
 
+type newFieldType = { label: string; type: textFieldType };
+
+type previewFormData = {
+  id: number;
+  title: string;
+  currentFieldIndex: number;
+  formFields: formField[];
+};
+
+//Answers are stored as an array of answerSetType where each answerSetType belongs to a form
+type answerSetType = {
+  formId: number;
+  answers: { fieldId: number; answer: string | number[] }[];
+};
+
 export type {
   textFieldType,
   formField,
   formData,
+  newFieldType,
   TextField,
   DropdownField,
   RadioGroup,
   MultiSelect,
+  previewFormData,
+  answerSetType,
 };
