@@ -2,9 +2,9 @@ import React from "react";
 
 export default function FieldSet(props: {
   id: number;
-  type: string;
   label: string;
   value: string;
+  meta: {description: "text" | "textarea" | "tel" | "password" | "email" | "url" | "time" | "date"};
   setFieldContentCB?: (id: number, content: string) => void;
   setLabelContentCB?: (id: number, content: string) => void;
   removeFieldCB?: (id: number) => void;
@@ -14,7 +14,7 @@ export default function FieldSet(props: {
     <div key={props.id} className="relative w-full mt-[30px]">
       <div className="flex">
         <input
-          type={props.type}
+          type={props.meta.description}
           required={true}
           //disabling input field if setLabelContent prop is absent because it is present only when editing form,
           //and absent while answering the form in preview mode
@@ -46,7 +46,7 @@ export default function FieldSet(props: {
         <i className="peer-focus:h-11 peer-valid:h-11 absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff] duration-500"></i>
         {props.setLabelContentCB && (
           <div className="flex">
-            <p className="pt-5">{props.type}</p>
+            <p className="pt-5">{props.meta.description}</p>
             <button
               className="p-2 mt-2 ml-2 z-[1]"
               onClick={() =>

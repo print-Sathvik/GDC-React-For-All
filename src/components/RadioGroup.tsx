@@ -1,10 +1,8 @@
 import React from "react";
-import { textFieldType } from "../types/formTypes";
 
 export default function RadioGroup(props: {
   id: number;
   label: string;
-  fieldType: textFieldType;
   options: string[];
   value: string;
   setFieldContentCB?: (id: number, content: string) => void;
@@ -63,7 +61,7 @@ export default function RadioGroup(props: {
                 />
               </svg>
             </button>
-            <p className="pt-5 float-right">{props.fieldType}</p>
+            <p className="pt-5 float-right">radio</p>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-8 w-8 float-right pt-2 rounded"

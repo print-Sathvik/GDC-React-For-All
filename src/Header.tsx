@@ -1,8 +1,9 @@
 import React from "react";
 import logo from "./logo.svg";
 import { ActiveLink } from "raviger";
+import { User } from "./types/userTypes";
 
-export default function Header() {
+export default function Header(props: {currentUser: User}) {
   return (
     <div className="flex gap-2 items-center w-[500px]">
       <img
@@ -15,7 +16,11 @@ export default function Header() {
         {[
           { page: "Home", url: "/" },
           { page: "About", url: "/about" },
+          ...(props.currentUser?.username?.length > 0
+            ? [{ page:"Logout", onClick: () => {localStorage.removeItem("token"); window.location.reload(); }}]
+            : [{ page:"Login", url:"/login" }])
         ].map((link) => (
+          link.url ? (
           <ActiveLink
             key={link.url}
             href={link.url}
@@ -23,7 +28,13 @@ export default function Header() {
             exactActiveClass="bg-blue-300"
           >
             {link.page}
-          </ActiveLink>
+          </ActiveLink>) : (<button
+            key={link.page}
+            onClick={link.onClick}
+            className="p-2 px-4 m-2 mx-4 hover:bg-blue-300"
+          >
+            {link.page}
+          </button>)
         ))}
       </div>
     </div>

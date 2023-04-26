@@ -1,4 +1,4 @@
-import { newFieldType, previewFormData, textFieldType } from "./formTypes";
+import { formData, newFieldType, previewFormData, textFieldType } from "./formTypes";
 
 type AddAction = {
   type: "add_field";
@@ -41,6 +41,11 @@ type UpdateOption = {
   content: string;
 };
 
+type FormRenderAction = {
+  type: "render_form";
+  form: formData
+}
+
 type FormAction =
   | AddAction
   | RemoveAction
@@ -49,7 +54,9 @@ type FormAction =
   | UpdateLabelAction
   | AddOption
   | RemoveOption
-  | UpdateOption;
+  | UpdateOption
+  
+  |FormRenderAction
 
 type ChangeText = {
   type: "change_text";

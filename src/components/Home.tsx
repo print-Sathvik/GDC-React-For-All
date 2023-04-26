@@ -1,24 +1,38 @@
 import React, { useEffect, useState } from "react";
-import { formData } from "./Form";
 import { Link, useQueryParams } from "raviger";
+import { Form } from "../types/formTypes";
+import Modal from "./common/Modal";
+import CreateForm from "./CreateForm";
+import { listForms } from "../utils/apiUtils";
+import { Pagination } from "../types/common";
+
+const fetchForms = async (setFormsCB: (value: Form[]) => void) => {
+  try {
+    const parsedResponse: Pagination<Form> = await listForms({offset:0, limit: 3});
+    setFormsCB(parsedResponse.results)
+  } catch(error) {
+    console.log(error)
+  }
+}
 
 export default function Home() {
   const savedFormsJSON = localStorage.getItem("savedForms");
   const savedForms = savedFormsJSON ? JSON.parse(savedFormsJSON) : [];
-  const [savedFormsState, setState] = useState(savedForms);
+  const [savedFormsState, setFormsState] = useState<Form[]>(savedForms);
   const [{ search }, setQuery] = useQueryParams();
   const [searchString, setSearchString] = useState("");
+  const [newForm, setNewForm] = useState(false)
 
   const deleteForm: (id: number) => void = (id: number) => {
     //Delets form from state and useEffect hook is triggered immediately to update local storage
-    setState((savedFormsState: formData[]) =>
+    setFormsState((savedFormsState: Form[]) =>
       savedFormsState.filter((form) => form.id !== id)
     );
   };
 
   useEffect(() => {
-    localStorage.setItem("savedForms", JSON.stringify(savedFormsState));
-  }, [savedFormsState]);
+    fetchForms(setFormsState)
+  }, [])
 
   return (
     //This renders form title, edit and delte buttons and a button to create new form
@@ -39,11 +53,10 @@ export default function Home() {
         />
       </form>
       <div className="divide-y-2">
-        {savedFormsState
-          .filter((form: formData) =>
+        {savedFormsState?.filter((form: Form) =>
             form.title.toLowerCase().includes(search?.toLowerCase() || "")
           )
-          .map((form: formData) => (
+          .map((form: Form) => (
             <div key={form.id} className="flex">
               <h2 className="py-4 px-2 flex-1">
                 {form.title || "Untitled Form"}
@@ -85,7 +98,7 @@ export default function Home() {
                   />
                 </svg>
               </Link>
-              <button className="px-2 my-2" onClick={() => deleteForm(form.id)}>
+              <button className="px-2 my-2" onClick={() => form.id && deleteForm(form.id)}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -105,13 +118,16 @@ export default function Home() {
           ))}
       </div>
       <div className="text-center my-2">
-        <Link
-          href={"/forms/0"}
+        <button
+          onClick={_ => {setNewForm(true)}}
           className="bg-blue-600 hover:bg-blue-800 text-white font-bold p-2 my-4 rounded"
         >
           New Form
-        </Link>
+        </button>
       </div>
+      <Modal open={newForm} closeCB={() => setNewForm(false)}>
+        <CreateForm />
+      </Modal>
     </div>
   );
 }

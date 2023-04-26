@@ -1,10 +1,8 @@
 import React, { useRef } from "react";
-import { textFieldType } from "../types/formTypes";
 
 export default function DropDown(props: {
   id: number;
   label: string;
-  fieldType: textFieldType;
   options: string[];
   value: string;
   setFieldContentCB?: (id: number, content: string) => void;
@@ -58,7 +56,7 @@ export default function DropDown(props: {
         <i className="peer-focus:h-11 peer-valid:h-11 absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff] duration-500"></i>
         {props.setLabelContentCB && (
           <div className="flex">
-            <p className="pt-5">{props.fieldType}</p>
+            <p className="pt-5">dropdown</p>
             <button
               className="p-2 mt-2 ml-2 z-[1]"
               onClick={() =>

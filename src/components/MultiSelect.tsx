@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { textFieldType } from "../types/formTypes";
 
 export default function Multi(props: {
   id: number;
   label: string;
-  fieldType: textFieldType;
   options: string[];
-  value: string;
-  selected: number[];
+  value: number[]
   setMultiSelectContentCB?: (id: number, ind: number) => void;
   setLabelContentCB?: (id: number, content: string) => void;
   removeFieldCB?: (id: number) => void;
@@ -15,14 +12,14 @@ export default function Multi(props: {
 }) {
   const [expanded, setExpandedState] = useState(false);
   const [chosenOptions, setChosenOptionsState] = useState(() =>
-    props.options.filter((option, ind) => props.selected.includes(ind))
+    props.options.filter((option, ind) => props.value.includes(ind))
   );
 
   useEffect(() => {
     setChosenOptionsState(
-      props.options.filter((option, ind) => props.selected.includes(ind))
+      props.options.filter((option, ind) => props.value.includes(ind))
     );
-  }, [props.options, props.selected]);
+  }, [props.options, props.value]);
 
   return (
     //This Component has set of Multiselect label and it options
@@ -75,7 +72,7 @@ export default function Multi(props: {
                 />
               </svg>
             </button>
-            <p className="pt-5 float-right">{props.fieldType}</p>
+            <p className="pt-5 float-right">multiselect</p>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-8 w-8 float-right pt-2 rounded"
@@ -148,7 +145,7 @@ export default function Multi(props: {
                       name={String(props.id)}
                       id={String(ind)}
                       value={ind}
-                      defaultChecked={props.selected.includes(ind)}
+                      defaultChecked={props.value.includes(ind)}
                       hidden={true}
                       onChange={(e) => {
                         props.setMultiSelectContentCB &&
