@@ -1,8 +1,9 @@
-import { formData, newFieldType, previewFormData, textFieldType } from "./formTypes";
+import { Submission, formData, formField, newFieldType, textFieldType } from "./formTypes";
 
 type AddAction = {
   type: "add_field";
-  kind: textFieldType;
+  form_id: number;
+  fieldType: textFieldType;
   label: string;
   callback: () => void;
 };
@@ -12,15 +13,16 @@ type UpdateTitleAction = {
   title: string;
 };
 
-type RemoveAction = {
-  type: "remove_field";
-  id: number;
-};
-
 type UpdateLabelAction = {
   type: "update_label";
   id: number;
   content: string;
+};
+
+type RemoveFieldAction = {
+  type: "remove_field";
+  form_id: number;
+  field_id: number;
 };
 
 type AddOption = {
@@ -46,9 +48,13 @@ type FormRenderAction = {
   form: formData
 }
 
+type FieldsRenderAction = {
+  type: "render_fields";
+  fields: formField[]
+}
+
 type FormAction =
   | AddAction
-  | RemoveAction
   | UpdateTitleAction
   | UpdateLabelAction
   | UpdateLabelAction
@@ -57,6 +63,32 @@ type FormAction =
   | UpdateOption
   
   |FormRenderAction
+  |FieldsRenderAction
+  |RemoveFieldAction
+
+type UpdateAnswerAction = {
+  type: "update_answer";
+  field_id: number;
+  answer: string;
+};
+
+type RenderSubmission = {
+  type: "render_submission"
+  submission: Submission
+}
+
+type newSubmission = {
+  type: "render_newSubmission"
+  form: formData | null
+}
+
+type MultiSelectUpdateAction = {
+  type: "update_multiselect";
+  field_id: number;
+  index: number;
+};
+
+type SubmitAction = UpdateAnswerAction | RenderSubmission | newSubmission | MultiSelectUpdateAction
 
 type ChangeText = {
   type: "change_text";
@@ -89,20 +121,4 @@ type PreviewAction =
   | PreviewMultiSelectUpdate
   | ChangeQuestion;
 
-type AnswerValueAction = {
-  type: "answer_value";
-  id: number;
-  content: string;
-  formState: previewFormData;
-};
-
-type AnswerMultiSelectAction = {
-  type: "answer_multiselect";
-  id: number;
-  index: number;
-  formState: previewFormData;
-};
-
-type AnswerAction = AnswerValueAction | AnswerMultiSelectAction;
-
-export type { FormAction, NewFieldActions, PreviewAction, AnswerAction };
+export type { FormAction, NewFieldActions, PreviewAction, SubmitAction };

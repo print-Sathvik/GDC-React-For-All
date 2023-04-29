@@ -1,4 +1,5 @@
 import { PaginationParams } from "../types/common";
+import { Submission, formField } from "../types/formTypes";
 import { Form, formData, patchPayload } from "../types/formTypes";
 
 const API_BASE_URL = "https://tsapi.coronasafe.live/api/"
@@ -58,15 +59,52 @@ export const listForms = (pageParams: PaginationParams) => {
   return request('forms/', 'GET', pageParams)
 }
 
-export const listFields = (form_id: number) => {
-  return request(`forms/${form_id}/fields/`, 'GET')
-}
-
-export const getFormData = async (form_id: number) => {
-  const response = await request(`forms/${form_id}/`, 'GET')
+export const getFormData = async (form_pk: number) => {
+  const response = await request(`forms/${form_pk}/`, 'GET')
   return response as formData
 }
 
-export const patchFormData = async (form_id: number, data: patchPayload) => {
-  return request(`forms/${form_id}/`, "PATCH", data)
+export const patchFormData = async (form_pk: number, data: patchPayload) => {
+  return request(`forms/${form_pk}/`, "PATCH", data)
+}
+
+export const deleteForm = async (form_pk: number) => {
+  return request(`forms/${form_pk}/`, "DELETE")
+}
+
+export const postField = async (form_pk: number, field: Omit<formField, "id">) => {
+  return request(`forms/${form_pk}/fields/`, "POST", field)
+}
+
+export const getFields = async (form_pk: number) => {
+  return request(`forms/${form_pk}/fields/`, 'GET')
+}
+
+export const patchField = async (form_pk: number, field: formField) => {
+  return request(`forms/${form_pk}/fields/${field.id}/`, "PATCH", field)
+}
+
+export const deleteFieldreq = async (form_pk: number, field_id: number) => {
+  return request(`forms/${form_pk}/fields/${field_id}/`, 'DELETE', {})
+}
+
+export const getSubmissions = async (form_pk: number) => {
+  return request(`forms/${form_pk}/submission/`, 'GET')
+}
+
+export const getSubmission = async (form_pk: number, submission_id: number) => {
+  return request(`forms/${form_pk}/submission/${submission_id}/`, 'GET')
+}
+
+export const getField = async (form_pk: number, field_id: number) => {
+  return request(`forms/${form_pk}/fields/${field_id}/`, 'GET')
+}
+
+export const postSubmission =async (form_pk:number, submission:Submission) => {
+  return request(`forms/${form_pk}/submission/`, "POST", submission)
+}
+
+export const getFormsCount = async () => {
+  const allFormsData = await request(`forms/`, 'GET', {offset: 0, limit: 1})
+  return allFormsData.count
 }

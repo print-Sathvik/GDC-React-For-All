@@ -30,16 +30,15 @@ export const validateForm = (form: Form) => {
 
 type textFieldType =
   | "text"
+  | "dropdown"
+  | "radio"
+  | "multiselect"
   | "email"
   | "date"
   | "time"
   | "tel"
   | "url"
   | "password"
-  | "dropdown"
-  | "radio"
-  | "checkbox"
-  | "multiselect"
   | "textarea";
 
 type TextField = {
@@ -47,6 +46,7 @@ type TextField = {
   id: number;
   label: string;
   value: string;
+  options: []
   meta: {description: "text" | "textarea" | "tel" | "password" | "email" | "url" | "time" | "date"}
 };
 
@@ -65,6 +65,7 @@ type RadioGroup = {
   label: string;
   options: string[];
   value: string;
+  meta: {}
 };
 
 type MultiSelect = {
@@ -72,7 +73,7 @@ type MultiSelect = {
   id: number;
   label: string;
   options: string[];
-  value: number[];
+  value: string;
   meta: {description: "MULTIPLE"}
 };
 
@@ -91,15 +92,30 @@ type previewFormData = {
   formFields: formField[];
 };
 
-type answerSetType = {
-  formId: number;
-  answers: { fieldId: number; answer: string | number[] }[];
-};
-
 type patchPayload = {
   title: string
   description: string | null,
   is_public: boolean
+}
+
+
+type Answer = {
+  form_field: number
+  value: string
+}
+
+type Submission = {
+  answers: Answer[]
+  id?: number
+  form?: formData
+  created_date?: string
+}
+
+type allSubmissions = {
+  count: number
+  next?: string
+  previous?: string
+  results: Submission[]
 }
 
 export type {
@@ -112,106 +128,8 @@ export type {
   RadioGroup,
   MultiSelect,
   previewFormData,
-  answerSetType,
   Form,
   Errors,
 
-  patchPayload
+  patchPayload, Answer, Submission, allSubmissions
 };
-
-
-
-
-
-
-
-
-
-
-
-
-// type formData = {
-//   id: number;
-//   title: string;
-//   formFields: formField[];
-// };
-
-
-// type Meta = {description: string | null}
-
-// type TextField = {
-//   kind: "TEXT";
-//   id: number;
-//   label: string;
-//   value: string;
-//   meta: {description: "text" | "textarea" | "tel" | "password" | "textarea"}
-// };
-
-// type DropdownField = {
-//   kind: "DROPDOWN";
-//   id: number;
-//   label: string;
-//   options: string[];
-//   value: string;
-//   meta: {description: "SIMPLE"}
-// };
-
-// type RadioGroup = {
-//   kind: "RADIO";
-//   id: number;
-//   label: string;
-//   options: string[];
-//   value: string;
-// };
-
-// type MultiSelect = {
-//   kind: "DROPDOWN";
-//   id: number;
-//   label: string;
-//   options: string[];
-//   selected: number[];
-//   meta: {description: "MULTISELECT"}
-// };
-
-// type TextArea = {
-//   kind: "textarea";
-//   id: number;
-//   label: string;
-//   value: string;
-// };
-
-// type formField =
-//   | TextField
-//   | DropdownField
-//   | RadioGroup
-//   | MultiSelect
-
-// type newFieldType = { label: string; kind:  };
-
-// type previewFormData = {
-//   id: number;
-//   title: string;
-//   currentFieldIndex: number;
-//   formFields: formField[];
-// };
-
-// //Answers are stored as an array of answerSetType where each answerSetType belongs to a form
-// type answerSetType = {
-//   formId: number;
-//   answers: { fieldId: number; answer: string | number[] }[];
-// };
-
-// export type {
-//   textFieldType,
-//   formField,
-//   formData,
-//   newFieldType,
-//   TextField,
-//   DropdownField,
-//   RadioGroup,
-//   MultiSelect,
-//   previewFormData,
-//   answerSetType,
-//   Form,
-//   Errors
-// };

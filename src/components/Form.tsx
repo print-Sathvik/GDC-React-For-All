@@ -1,18 +1,20 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef, useReducer } from "react";
-import FieldSet from "./FieldSet";
-import { Link } from "raviger";
+import FieldSet from "./FormView/FieldSet";
+import { Link, navigate } from "raviger";
 import {
   formData,
   formField,
   newFieldType,
   textFieldType,
 } from "../types/formTypes";
-import DropDown from "./DropDown";
-import RadioGroup from "./RadioGroup";
-import MultiSelect from "./MultiSelect";
-import TextArea from "./TextArea";
+import DropDown from "./FormView/DropDown";
+import RadioGroup from "./FormView/RadioGroup";
+import MultiSelect from "./FormView/MultiSelect";
+import TextArea from "./FormView/TextArea";
 import { FormAction, NewFieldActions } from "../types/actionTypes";
-import { getFormData, listForms, patchFormData } from "../utils/apiUtils";
+import { deleteFieldreq, getFields, getFormData, me, patchField, patchFormData, postField } from "../utils/apiUtils";
+import { TrashIcon } from '@heroicons/react/24/outline'
 
 
 const getLocalForms: () => formData[] = () => {
@@ -31,6 +33,15 @@ const initializeState = async (form_id:number, dispatchFormCB: React.Dispatch<Fo
   }
 }
 
+const initializeFields = async (form_id: number, dispatchFieldsCB: React.Dispatch<FormAction>) => {
+  try {
+    const parsedFields = await getFields(form_id)
+    dispatchFieldsCB({type: "render_fields", fields: parsedFields.results})
+  } catch (error) {
+    
+  }
+}
+
 const saveFormData = async (currentState: formData) => {
   try {
     await patchFormData(currentState.id, {title:currentState.title, description: currentState.description, is_public:currentState.is_public})
@@ -38,6 +49,31 @@ const saveFormData = async (currentState: formData) => {
     console.log(error)
   }
 };
+
+const addField = async (form_id: number, newField: formField) => {
+  try {
+    const field = await postField(form_id, newField);
+    return field.id
+  } catch(error) {
+    console.log(error)
+  }
+}
+
+const saveFields = async (form_id: number, fieldsState: formField[]) => {
+  try {
+    fieldsState.map(async (field) => await patchField(form_id, field))
+  } catch(error) {
+    console.log(error)
+  }
+}
+
+const deleteField = async (form_id: number, field_id: number) => {
+  try {
+    await deleteFieldreq(form_id, field_id);
+  } catch(error) {
+    console.log(error)
+  }
+}
 
 const newFieldReducer = (
   state: newFieldType,
@@ -55,47 +91,62 @@ const newFieldReducer = (
   }
 };
 
-const getNewFormFields: (type: "TEXT" | "DROPDOWN" | "RADIO" | "GENERIC", label: string) => formField = (
+const getNewFormFields: (type: textFieldType, label: string) => formField = (
   type,
   label
 ) => {
   switch (type) {
-    case "TEXT":
+    case "text":
+    case "email":
+    case "date":
+    case "time":
+    case "tel":
+    case "url":
+    case "password":
       return {
-        kind: "text",
+        kind: "TEXT",
         id: Number(new Date()),
         label: label,
         value: "",
-        meta: {description: "text"}
+        options: [],
+        meta: {description: type}
       };
-    // case "dropdown":
-    //   return {
-    //     kind: type as "dropdown",
-    //     id: Number(new Date()),
-    //     label: label,
-    //     fieldType: type,
-    //     options: [],
-    //     value: "",
-    //   };
-    // case "radio":
-    //   return {
-    //     kind: type as "radio",
-    //     id: Number(new Date()),
-    //     label: label,
-    //     fieldType: type,
-    //     options: [],
-    //     value: "",
-    //   };
-    // case "multiselect":
-    //   return {
-    //     kind: type as "multiselect",
-    //     id: Number(new Date()),
-    //     label: label,
-    //     fieldType: type,
-    //     options: [],
-    //     value: "",
-    //     selected: [],
-    //   };
+    case "textarea":
+      return {
+        kind: "TEXT",
+        id: Number(new Date()),
+        label: label,
+        value: "",
+        options: [],
+        meta: {description: "textarea"}
+      };
+    case "dropdown":
+      return {
+        kind: "DROPDOWN",
+        id: Number(new Date()),
+        label: label,
+        options: [],
+        value: "",
+        meta: {description: "SINGLE"}
+      };
+    case "radio":
+      return {
+        kind: "RADIO",
+        id: Number(new Date()),
+        label: label,
+        options: [],
+        value: "",
+        meta: {}
+      };
+    case "multiselect":
+      return {
+        kind: "DROPDOWN",
+        id: Number(new Date()),
+        label: label,
+        options: [],
+        value: "",
+        meta: {description: "MULTIPLE"}
+      };
     // case "textarea":
     //   return {
     //     kind: "textarea",
@@ -106,18 +157,19 @@ const getNewFormFields: (type: "TEXT" | "DROPDOWN" | "RADIO" | "GENERIC", label:
     //   };
     default:
       return {
-        kind: "text",
+        kind: "TEXT",
         id: Number(new Date()),
         label: label,
-        fieldType: type,
         value: "",
+        options: [],
+        meta: {description: "text"}
       };
   }
 };
 
 const reducer:(state: formData | null, action: FormAction) => formData|null  = (state: formData | null, action: FormAction) => {
   if(action.type === "render_form") {
-    //renderinh=g will take place initially when the state is null. So if state === null condition is
+    //rendering will take place initially when the state is null. So if state === null condition is
     //placed below this. This should take place even if the form state is null 
     return {id: action.form.id, title: action.form.title, description: action.form.description, is_public: action.form.is_public,
       created_by: action.form.created_by, created_date: action.form.created_date, modified_date: action.form.modified_date}
@@ -134,15 +186,19 @@ const reducer:(state: formData | null, action: FormAction) => formData|null  = (
 
 const fieldsReducer: (fieldsState: formField[], action: FormAction) => formField[] = (fieldsState: formField[], action: FormAction) => {
   switch(action.type)  {
+    case "render_fields":
+      return action.fields
     case "add_field":
-      const newFormField = getNewFormFields(action.kind, action.label);
-      // action.callback();
+      const newFormField = getNewFormFields(action.fieldType, action.label);
+      action.callback();
       if (newFormField.label.length === 0) {
         return fieldsState;
       }
+      addField(action.form_id, newFormField).then(fieldId => newFormField.id = fieldId).catch(error => {return fieldsState})
       return [...fieldsState, newFormField]
     case "remove_field":
-      return fieldsState.filter((field) => field.id !== action.id)
+      deleteField(action.form_id, action.field_id)
+      return fieldsState.filter((field) => field.id !== action.field_id)
     case "update_label":
       return fieldsState.map((field) =>
           field.id === action.id
@@ -200,7 +256,7 @@ const fieldsReducer: (fieldsState: formField[], action: FormAction) => formField
   }
 }
 
-function Form(props: { id: number }) {
+function Form(props: { id: number}) {
   const [state, dispatchForm] = useReducer(reducer, null)
   const [fieldsState, dispatchFields] = useReducer(fieldsReducer, [])
   const defaultNewField: newFieldType = {
@@ -215,8 +271,14 @@ function Form(props: { id: number }) {
   const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    me().then(currentUser => {
+      if(currentUser.username.length === 0) navigate("/")
+    })
+  }, []);
+
+  useEffect(() => {
     initializeState(props.id, dispatchForm)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    initializeFields(props.id, dispatchFields)
   }, [])
   
 
@@ -239,6 +301,16 @@ function Form(props: { id: number }) {
     };
   }, [state]);
 
+  useEffect(() => {
+    let timeout = setTimeout(() => {
+      saveFields(props.id, fieldsState);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [fieldsState]);
+
   const showOptions: (id: number) => void = (id) => {
     //If same element is clicked close it if its open, if different element is clicked, then open that element
     id === expandedElement ? setExpandedElement(0) : setExpandedElement(id);
@@ -251,14 +323,14 @@ function Form(props: { id: number }) {
           <input
             type="text"
             required={true}
-            value={state?.title}
+            value={state ? state.title : ""}
             ref={titleRef}
             onChange={(e) =>
               dispatchForm({ type: "update_title", title: e.target.value })
             }
             className="peer relative w-full pt-5 px-2.5 pb-2.5 bg-transparent outline-none z-[1] invalid:text-transparent focus:text-black duration-500 flex-1"
           />
-          <label className="absolute left-0 text-[#8f8f8f] pt-5 px-2.5 pb-2.5 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[12px] peer-valid:text-[12px] duration-500">
+          <label className="absolute left-0 text-[#8f8f8f] pt-5 px-2.5 pb-2.5 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[14px] peer-valid:text-[14px] duration-500">
             Form Title
           </label>
           <i className="peer-focus:h-11 peer-valid:h-11 absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff] duration-500"></i>
@@ -266,13 +338,31 @@ function Form(props: { id: number }) {
         {fieldsState.map((field) => {
           switch (field.kind) {
             case "TEXT":
-              return (
-                <FieldSet
+              return field.meta.description !== "textarea" ?
+                (
+                  <FieldSet
+                    id={field.id}
+                    key={field.id}
+                    label={field.label}
+                    value={field.value}
+                    meta={field.meta}
+                    setLabelContentCB={(id, content) =>
+                      dispatchFields({
+                        type: "update_label",
+                        id: id,
+                        content: content,
+                      })
+                    }
+                    removeFieldCB={(id) =>
+                      dispatchFields({ type: "remove_field", form_id: props.id ,field_id: id })
+                    }
+                  />
+                ) : (
+                  <TextArea
                   id={field.id}
                   key={field.id}
                   label={field.label}
                   value={field.value}
-                  meta={{description: "text"}}
                   setLabelContentCB={(id, content) =>
                     dispatchFields({
                       type: "update_label",
@@ -281,14 +371,13 @@ function Form(props: { id: number }) {
                     })
                   }
                   removeFieldCB={(id) =>
-                    dispatchFields({ type: "remove_field", id: id })
+                    dispatchFields({ type: "remove_field", form_id: props.id ,field_id: id })
                   }
                 />
-              );
+                )
             case "DROPDOWN":
-              switch(field.meta.description) {
-                case "SINGLE":
-                  return (
+              return field.meta.description === "SINGLE"
+                  ? (
                     <div key={field.id}>
                       <div className="flex">
                         <DropDown
@@ -305,13 +394,13 @@ function Form(props: { id: number }) {
                             })
                           }
                           removeFieldCB={(id) =>
-                            dispatchFields({ type: "remove_field", id: id })
+                            dispatchFields({ type: "remove_field", form_id: props.id, field_id: id })
                           }
                           showOptionsCB={showOptions}
                         />
                         <button
                           onClick={() => {
-                            dispatchForm({ type: "add_option", id: field.id });
+                            dispatchFields({ type: "add_option", id: field.id });
                             setExpandedElement(field.id);
                           }}
                           className="bg-blue-600 hover:bg-blue-800 text-white font-bold p-2 mt-10 mr-2 flex-1 h-fit text-center rounded"
@@ -350,37 +439,22 @@ function Form(props: { id: number }) {
                                 })
                               }
                             >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth="1.2"
-                                stroke="red"
-                                className="w-5 h-5"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                                />
-                              </svg>
+                              <TrashIcon className="w-5 h-5" color="red" />
                             </button>
                             <i className="absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff]"></i>
                           </div>
                         ))}
                     </div>
-                  );
-                case "MULTIPLE":
-                  return (
+                  )
+                : (
                     <div key={field.id}>
                       <div className="flex">
-                        {/* <MultiSelect
+                        <MultiSelect
                           id={field.id}
                           key={field.id}
                           label={field.label}
-                          value={field.value}
-                          selected={field.selected}
                           options={field.options}
+                          value={field.value}
                           setLabelContentCB={(id, content) =>
                             dispatchFields({
                               type: "update_label",
@@ -389,10 +463,10 @@ function Form(props: { id: number }) {
                             })
                           }
                           removeFieldCB={(id) =>
-                            dispatchFields({ type: "remove_field", id: id })
+                            dispatchFields({ type: "remove_field", form_id: props.id, field_id:id})
                           }
                           showOptionsCB={showOptions}
-                        /> */}
+                        />
                         <button
                           onClick={() => {
                             dispatchFields({ type: "add_option", id: field.id });
@@ -435,28 +509,13 @@ function Form(props: { id: number }) {
                                 })
                               }
                             >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth="1.2"
-                                stroke="red"
-                                className="w-5 h-5"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                                />
-                              </svg>
+                              <TrashIcon className="w-5 h-5" color="red" />
                             </button>
                             <i className="absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff]"></i>
                           </div>
                         ))}
                     </div>
                   );
-                            }
-                            break
             case "RADIO":
               return (
                 <div key={field.id}>
@@ -475,7 +534,7 @@ function Form(props: { id: number }) {
                         })
                       }
                       removeFieldCB={(id) =>
-                        dispatchFields({ type: "remove_field", id: id })
+                        dispatchFields({ type: "remove_field", form_id: props.id, field_id:id})
                       }
                       showOptionsCB={showOptions}
                     />
@@ -499,7 +558,7 @@ function Form(props: { id: number }) {
                         <input
                           type="radio"
                           name={String(field.id)}
-                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                          className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                         />
                         <input
                           type="text"
@@ -526,46 +585,13 @@ function Form(props: { id: number }) {
                             })
                           }
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth="1.2"
-                            stroke="red"
-                            className="w-5 h-5"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                            />
-                          </svg>
+                          <TrashIcon className="w-5 h-5" color="red" />
                         </button>
                         <i className="absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff]"></i>
                       </div>
                     ))}
                 </div>
               );
-            // case "textarea":
-            //   return (
-            //     <TextArea
-            //       id={field.id}
-            //       key={field.id}
-            //       type={field.fieldType}
-            //       label={field.label}
-            //       value={field.value}
-            //       setLabelContentCB={(id, content) =>
-            //         dispatchFields({
-            //           type: "update_label",
-            //           id: id,
-            //           content: content,
-            //         })
-            //       }
-            //       removeFieldCB={(id) =>
-            //         dispadispatchFieldstchForm({ type: "remove_field", id: id })
-            //       }
-            //     />
-            //   );
             default:
               return <div>No such field exists</div>;
           }
@@ -608,8 +634,7 @@ function Form(props: { id: number }) {
             "tel",
             "url",
             "range",
-            "time",
-            "file",
+            "time"
           ].map((type) => (
             <option key={type} value={type}>
               {type}
@@ -619,10 +644,11 @@ function Form(props: { id: number }) {
         <button
           className="bg-yellow-500 hover:bg-yellow-800 flex-shrink text-white font-bold p-2 my-4 ml-2 rounded"
           onClick={(_) =>
-            dispatchForm({
+            dispatchFields({
               type: "add_field",
+              form_id: props.id,
               label: newField.label,
-              kind: newField.type,
+              fieldType: newField.type,
               callback: () => dispatch({ type: "clear_text" }),
             })
           }
