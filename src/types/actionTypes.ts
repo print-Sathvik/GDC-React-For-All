@@ -1,4 +1,10 @@
-import { Submission, formData, formField, newFieldType, textFieldType } from "./formTypes";
+import {
+  Submission,
+  formData,
+  formField,
+  newFieldType,
+  textFieldType,
+} from "./formTypes";
 
 type AddAction = {
   type: "add_field";
@@ -45,13 +51,13 @@ type UpdateOption = {
 
 type FormRenderAction = {
   type: "render_form";
-  form: formData
-}
+  form: formData;
+};
 
 type FieldsRenderAction = {
   type: "render_fields";
-  fields: formField[]
-}
+  fields: formField[];
+};
 
 type FormAction =
   | AddAction
@@ -61,10 +67,9 @@ type FormAction =
   | AddOption
   | RemoveOption
   | UpdateOption
-  
-  |FormRenderAction
-  |FieldsRenderAction
-  |RemoveFieldAction
+  | FormRenderAction
+  | FieldsRenderAction
+  | RemoveFieldAction;
 
 type UpdateAnswerAction = {
   type: "update_answer";
@@ -73,14 +78,14 @@ type UpdateAnswerAction = {
 };
 
 type RenderSubmission = {
-  type: "render_submission"
-  submission: Submission
-}
+  type: "render_submission";
+  submission: Submission;
+};
 
 type newSubmission = {
-  type: "render_newSubmission"
-  form: formData | null
-}
+  type: "render_newSubmission";
+  form: formData | null;
+};
 
 type MultiSelectUpdateAction = {
   type: "update_multiselect";
@@ -88,7 +93,11 @@ type MultiSelectUpdateAction = {
   index: number;
 };
 
-type SubmitAction = UpdateAnswerAction | RenderSubmission | newSubmission | MultiSelectUpdateAction
+type SubmitAction =
+  | UpdateAnswerAction
+  | RenderSubmission
+  | newSubmission
+  | MultiSelectUpdateAction;
 
 type ChangeText = {
   type: "change_text";

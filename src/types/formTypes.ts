@@ -1,32 +1,32 @@
 type formData = {
   id: number;
   title: string;
-  description: string | null
-  is_public: boolean
-  created_by: number
-  created_date: string
-  modified_date: string
+  description: string | null;
+  is_public: boolean;
+  created_by: number;
+  created_date: string;
+  modified_date: string;
 };
 
 type Form = {
   id?: number;
   title: string;
-  description?: string
-  is_public?: boolean
+  description?: string;
+  is_public?: boolean;
 };
 
-type Errors<T> = Partial<Record<keyof T, string>>
+type Errors<T> = Partial<Record<keyof T, string>>;
 
 export const validateForm = (form: Form) => {
-  const errors: Errors<Form> = {}
-  if(form.title.length < 1) {
-    errors.title = "Title is Required"
+  const errors: Errors<Form> = {};
+  if (form.title.length < 1) {
+    errors.title = "Title is Required";
   }
-  if(form.title.length > 100) {
-    errors.title = "Title must be shorter than 100 characters"
+  if (form.title.length > 100) {
+    errors.title = "Title must be shorter than 100 characters";
   }
-  return errors
-}
+  return errors;
+};
 
 type textFieldType =
   | "text"
@@ -46,8 +46,18 @@ type TextField = {
   id: number;
   label: string;
   value: string;
-  options: []
-  meta: {description: "text" | "textarea" | "tel" | "password" | "email" | "url" | "time" | "date"}
+  options: [];
+  meta: {
+    description:
+      | "text"
+      | "textarea"
+      | "tel"
+      | "password"
+      | "email"
+      | "url"
+      | "time"
+      | "date";
+  };
 };
 
 type DropdownField = {
@@ -56,7 +66,7 @@ type DropdownField = {
   label: string;
   options: string[];
   value: string;
-  meta: {description: "SINGLE"}
+  meta: { description: "SINGLE" };
 };
 
 type RadioGroup = {
@@ -65,7 +75,7 @@ type RadioGroup = {
   label: string;
   options: string[];
   value: string;
-  meta: {}
+  meta: {};
 };
 
 type MultiSelect = {
@@ -74,14 +84,10 @@ type MultiSelect = {
   label: string;
   options: string[];
   value: string;
-  meta: {description: "MULTIPLE"}
+  meta: { description: "MULTIPLE" };
 };
 
-type formField =
-  | TextField
-  | DropdownField
-  | RadioGroup
-  | MultiSelect
+type formField = TextField | DropdownField | RadioGroup | MultiSelect;
 
 type newFieldType = { label: string; type: textFieldType };
 
@@ -93,30 +99,29 @@ type previewFormData = {
 };
 
 type patchPayload = {
-  title: string
-  description: string | null,
-  is_public: boolean
-}
-
+  title: string;
+  description: string | null;
+  is_public: boolean;
+};
 
 type Answer = {
-  form_field: number
-  value: string
-}
+  form_field: number;
+  value: string;
+};
 
 type Submission = {
-  answers: Answer[]
-  id?: number
-  form?: formData
-  created_date?: string
-}
+  answers: Answer[];
+  id?: number;
+  form?: formData;
+  created_date?: string;
+};
 
 type allSubmissions = {
-  count: number
-  next?: string
-  previous?: string
-  results: Submission[]
-}
+  count: number;
+  next?: string;
+  previous?: string;
+  results: Submission[];
+};
 
 export type {
   textFieldType,
@@ -130,6 +135,8 @@ export type {
   previewFormData,
   Form,
   Errors,
-
-  patchPayload, Answer, Submission, allSubmissions
+  patchPayload,
+  Answer,
+  Submission,
+  allSubmissions,
 };

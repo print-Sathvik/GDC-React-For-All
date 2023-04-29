@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React from "react";
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
-import { TrashIcon } from '@heroicons/react/24/outline'
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 export default function MultiSelect(props: {
   id: number;
@@ -12,7 +12,6 @@ export default function MultiSelect(props: {
   removeFieldCB: (id: number) => void;
   showOptionsCB: (id: number) => void;
 }) {
-
   return (
     //This Component has set of Multiselect label and it options
     <div
@@ -38,9 +37,7 @@ export default function MultiSelect(props: {
         <div className="float-right">
           <button
             className="p-2 mt-2 ml-2 z-[1] float-right"
-            onClick={() =>
-              props.removeFieldCB && props.removeFieldCB(props.id)
-            }
+            onClick={() => props.removeFieldCB && props.removeFieldCB(props.id)}
           >
             <TrashIcon className="w-6 h-6" color="red" />
           </button>

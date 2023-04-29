@@ -4,7 +4,17 @@ export default function FieldSetPrev(props: {
   id: number;
   label: string;
   value: string;
-  meta?: {description: "text" | "textarea" | "tel" | "password" | "email" | "url" | "time" | "date"};
+  meta?: {
+    description:
+      | "text"
+      | "textarea"
+      | "tel"
+      | "password"
+      | "email"
+      | "url"
+      | "time"
+      | "date";
+  };
   setFieldContentCB?: (id: number, content: string) => void;
 }) {
   return (
@@ -12,11 +22,12 @@ export default function FieldSetPrev(props: {
     <div key={props.id} className="relative w-full mt-[30px]">
       <div className="flex">
         <input
-          type= {props.meta ? props.meta.description : "text"}
+          type={props.meta ? props.meta.description : "text"}
           required={true}
           value={props.value}
           onChange={(e) =>
-            props.setFieldContentCB && props.setFieldContentCB(props.id, e.target.value)
+            props.setFieldContentCB &&
+            props.setFieldContentCB(props.id, e.target.value)
           }
           className="peer relative w-full pt-5 px-2.5 pb-2.5 bg-transparent outline-none z-[1] invalid:text-transparent focus:text-black duration-500 flex-1"
         />

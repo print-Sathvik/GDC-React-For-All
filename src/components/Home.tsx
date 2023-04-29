@@ -6,44 +6,49 @@ import CreateForm from "./CreateForm";
 import { deleteForm, listForms, me } from "../utils/apiUtils";
 import { Pagination } from "../types/common";
 import PageNav from "./common/PageNav";
-import { PencilSquareIcon } from '@heroicons/react/20/solid'
-import { TrashIcon, EyeIcon } from '@heroicons/react/24/outline'
+import { PencilSquareIcon } from "@heroicons/react/20/solid";
+import { TrashIcon, EyeIcon } from "@heroicons/react/24/outline";
 
-
-const fetchForms = async (offset: number, setFormsCB: (value: Form[]) => void) => {
+const fetchForms = async (
+  offset: number,
+  setFormsCB: (value: Form[]) => void
+) => {
   try {
-    const currentUser = await me()
-    if(currentUser.username === "") {
-      setFormsCB([])
-      return
+    const currentUser = await me();
+    if (currentUser.username === "") {
+      setFormsCB([]);
+      return;
     }
-    const parsedResponse: Pagination<Form> = await listForms({offset:offset, limit: 2});
-    setFormsCB(parsedResponse.results)
-  } catch(error) {
-    console.log(error)
-    return false
+    const parsedResponse: Pagination<Form> = await listForms({
+      offset: offset,
+      limit: 2,
+    });
+    setFormsCB(parsedResponse.results);
+  } catch (error) {
+    console.log(error);
+    return false;
   }
-}
+};
 
 const removeForm = async (formId: number) => {
   try {
     await deleteForm(formId);
-    return true
-  } catch(error) {
-    console.log(error)
+    return true;
+  } catch (error) {
+    console.log(error);
   }
-}
+};
 
 export default function Home() {
   const [savedFormsState, setFormsState] = useState<Form[]>([]);
   const [{ search }, setQuery] = useQueryParams();
   const [searchString, setSearchString] = useState("");
-  const [newForm, setNewForm] = useState(false)
-  const [offset, setOffset] = useState<number>(0)
+  const [newForm, setNewForm] = useState(false);
+  const [offset, setOffset] = useState<number>(0);
 
   useEffect(() => {
-    fetchForms(offset, setFormsState)
-  }, [offset])
+    fetchForms(offset, setFormsState);
+  }, [offset]);
 
   return (
     //This renders form title, edit and delte buttons and a button to create new form
@@ -64,7 +69,8 @@ export default function Home() {
         />
       </form>
       <div className="divide-y-2">
-        {savedFormsState?.filter((form: Form) =>
+        {savedFormsState
+          ?.filter((form: Form) =>
             form.title.toLowerCase().includes(search?.toLowerCase() || "")
           )
           .map((form: Form) => (
@@ -78,18 +84,28 @@ export default function Home() {
               <Link href={`/submissions/${form.id}`} className="p-2 my-2">
                 <EyeIcon className="w-6 h-6" />
               </Link>
-              <button className="px-2 my-2" onClick={() => {
-                const deleteResult = form.id && removeForm(form.id)
-                if(deleteResult) setFormsState(savedFormsState.filter((savedForm) => form.id !== savedForm.id))
-                }}>
-                <TrashIcon color="red" className="w-6 h-6"/>
+              <button
+                className="px-2 my-2"
+                onClick={() => {
+                  const deleteResult = form.id && removeForm(form.id);
+                  if (deleteResult)
+                    setFormsState(
+                      savedFormsState.filter(
+                        (savedForm) => form.id !== savedForm.id
+                      )
+                    );
+                }}
+              >
+                <TrashIcon color="red" className="w-6 h-6" />
               </button>
             </div>
           ))}
       </div>
       <div className="text-center my-2">
         <button
-          onClick={_ => {setNewForm(true)}}
+          onClick={(_) => {
+            setNewForm(true);
+          }}
           className="bg-blue-600 hover:bg-blue-800 text-white font-bold p-2 my-4 rounded"
         >
           New Form

@@ -7,16 +7,12 @@ export default function DropDownPrev(props: {
   value: string;
   setFieldContentCB?: (id: number, content: string) => void;
 }) {
-
   return (
     //This Component has an dropdown field along with its label
-    <div
-      key={props.id}
-      className="inputSet relative w-full mt-[30px]"
-    >
+    <div key={props.id} className="inputSet relative w-full mt-[30px]">
       <p className="absolute left-0 -top-10 px-2.5 pb-2.5 mt-3 text-[#45f3ff] duration-500">
-          {props.label}
-        </p>
+        {props.label}
+      </p>
       <div className="flex">
         <select
           required={true}

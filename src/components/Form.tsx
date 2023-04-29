@@ -13,9 +13,16 @@ import RadioGroup from "./FormView/RadioGroup";
 import MultiSelect from "./FormView/MultiSelect";
 import TextArea from "./FormView/TextArea";
 import { FormAction, NewFieldActions } from "../types/actionTypes";
-import { deleteFieldreq, getFields, getFormData, me, patchField, patchFormData, postField } from "../utils/apiUtils";
-import { TrashIcon } from '@heroicons/react/24/outline'
-
+import {
+  deleteFieldreq,
+  getFields,
+  getFormData,
+  me,
+  patchField,
+  patchFormData,
+  postField,
+} from "../utils/apiUtils";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 const getLocalForms: () => formData[] = () => {
   const savedFormsJSON = localStorage.getItem("savedForms");
@@ -23,57 +30,65 @@ const getLocalForms: () => formData[] = () => {
   return persistantormFields;
 };
 
-const initializeState = async (form_id:number, dispatchFormCB: React.Dispatch<FormAction>) => {
+const initializeState = async (
+  form_id: number,
+  dispatchFormCB: React.Dispatch<FormAction>
+) => {
   try {
     const parsedData = await getFormData(form_id);
-    dispatchFormCB({type: "render_form", form: parsedData})
-    console.log("dispatched", parsedData)
-  } catch(error) {
-    console.log(error)
-  }
-}
-
-const initializeFields = async (form_id: number, dispatchFieldsCB: React.Dispatch<FormAction>) => {
-  try {
-    const parsedFields = await getFields(form_id)
-    dispatchFieldsCB({type: "render_fields", fields: parsedFields.results})
+    dispatchFormCB({ type: "render_form", form: parsedData });
+    console.log("dispatched", parsedData);
   } catch (error) {
-    
+    console.log(error);
   }
-}
+};
+
+const initializeFields = async (
+  form_id: number,
+  dispatchFieldsCB: React.Dispatch<FormAction>
+) => {
+  try {
+    const parsedFields = await getFields(form_id);
+    dispatchFieldsCB({ type: "render_fields", fields: parsedFields.results });
+  } catch (error) {}
+};
 
 const saveFormData = async (currentState: formData) => {
   try {
-    await patchFormData(currentState.id, {title:currentState.title, description: currentState.description, is_public:currentState.is_public})
-  } catch(error) {
-    console.log(error)
+    await patchFormData(currentState.id, {
+      title: currentState.title,
+      description: currentState.description,
+      is_public: currentState.is_public,
+    });
+  } catch (error) {
+    console.log(error);
   }
 };
 
 const addField = async (form_id: number, newField: formField) => {
   try {
     const field = await postField(form_id, newField);
-    return field.id
-  } catch(error) {
-    console.log(error)
+    return field.id;
+  } catch (error) {
+    console.log(error);
   }
-}
+};
 
 const saveFields = async (form_id: number, fieldsState: formField[]) => {
   try {
-    fieldsState.map(async (field) => await patchField(form_id, field))
-  } catch(error) {
-    console.log(error)
+    fieldsState.map(async (field) => await patchField(form_id, field));
+  } catch (error) {
+    console.log(error);
   }
-}
+};
 
 const deleteField = async (form_id: number, field_id: number) => {
   try {
     await deleteFieldreq(form_id, field_id);
-  } catch(error) {
-    console.log(error)
+  } catch (error) {
+    console.log(error);
   }
-}
+};
 
 const newFieldReducer = (
   state: newFieldType,
@@ -109,7 +124,7 @@ const getNewFormFields: (type: textFieldType, label: string) => formField = (
         label: label,
         value: "",
         options: [],
-        meta: {description: type}
+        meta: { description: type },
       };
     case "textarea":
       return {
@@ -118,7 +133,7 @@ const getNewFormFields: (type: textFieldType, label: string) => formField = (
         label: label,
         value: "",
         options: [],
-        meta: {description: "textarea"}
+        meta: { description: "textarea" },
       };
     case "dropdown":
       return {
@@ -127,7 +142,7 @@ const getNewFormFields: (type: textFieldType, label: string) => formField = (
         label: label,
         options: [],
         value: "",
-        meta: {description: "SINGLE"}
+        meta: { description: "SINGLE" },
       };
     case "radio":
       return {
@@ -136,7 +151,7 @@ const getNewFormFields: (type: textFieldType, label: string) => formField = (
         label: label,
         options: [],
         value: "",
-        meta: {}
+        meta: {},
       };
     case "multiselect":
       return {
@@ -145,7 +160,7 @@ const getNewFormFields: (type: textFieldType, label: string) => formField = (
         label: label,
         options: [],
         value: "",
-        meta: {description: "MULTIPLE"}
+        meta: { description: "MULTIPLE" },
       };
     // case "textarea":
     //   return {
@@ -162,103 +177,117 @@ const getNewFormFields: (type: textFieldType, label: string) => formField = (
         label: label,
         value: "",
         options: [],
-        meta: {description: "text"}
+        meta: { description: "text" },
       };
   }
 };
 
-const reducer:(state: formData | null, action: FormAction) => formData|null  = (state: formData | null, action: FormAction) => {
-  if(action.type === "render_form") {
+const reducer: (
+  state: formData | null,
+  action: FormAction
+) => formData | null = (state: formData | null, action: FormAction) => {
+  if (action.type === "render_form") {
     //rendering will take place initially when the state is null. So if state === null condition is
-    //placed below this. This should take place even if the form state is null 
-    return {id: action.form.id, title: action.form.title, description: action.form.description, is_public: action.form.is_public,
-      created_by: action.form.created_by, created_date: action.form.created_date, modified_date: action.form.modified_date}
+    //placed below this. This should take place even if the form state is null
+    return {
+      id: action.form.id,
+      title: action.form.title,
+      description: action.form.description,
+      is_public: action.form.is_public,
+      created_by: action.form.created_by,
+      created_date: action.form.created_date,
+      modified_date: action.form.modified_date,
+    };
   }
-  if(state === null) return null
+  if (state === null) return null;
 
   switch (action.type) {
-      case "update_title":
+    case "update_title":
       return { ...state, title: action.title };
     default:
-      return state
+      return state;
   }
 };
 
-const fieldsReducer: (fieldsState: formField[], action: FormAction) => formField[] = (fieldsState: formField[], action: FormAction) => {
-  switch(action.type)  {
+const fieldsReducer: (
+  fieldsState: formField[],
+  action: FormAction
+) => formField[] = (fieldsState: formField[], action: FormAction) => {
+  switch (action.type) {
     case "render_fields":
-      return action.fields
+      return action.fields;
     case "add_field":
       const newFormField = getNewFormFields(action.fieldType, action.label);
       action.callback();
       if (newFormField.label.length === 0) {
         return fieldsState;
       }
-      addField(action.form_id, newFormField).then(fieldId => newFormField.id = fieldId).catch(error => {return fieldsState})
-      return [...fieldsState, newFormField]
+      addField(action.form_id, newFormField)
+        .then((fieldId) => (newFormField.id = fieldId))
+        .catch((error) => {
+          return fieldsState;
+        });
+      return [...fieldsState, newFormField];
     case "remove_field":
-      deleteField(action.form_id, action.field_id)
-      return fieldsState.filter((field) => field.id !== action.field_id)
+      deleteField(action.form_id, action.field_id);
+      return fieldsState.filter((field) => field.id !== action.field_id);
     case "update_label":
       return fieldsState.map((field) =>
-          field.id === action.id
-            ? {
-                ...field,
-                label: action.content,
-              }
-            : {
-                ...field,
-              }
-        )
+        field.id === action.id
+          ? {
+              ...field,
+              label: action.content,
+            }
+          : {
+              ...field,
+            }
+      );
     case "add_option":
       return fieldsState.map((field) =>
-          field.id === action.id &&
-          (field.kind === "DROPDOWN" ||
-            field.kind === "RADIO")
-            ? {
-                ...field,
-                options: [...field.options, ""],
-              }
-            : {
-                ...field,
-              }
-        )
+        field.id === action.id &&
+        (field.kind === "DROPDOWN" || field.kind === "RADIO")
+          ? {
+              ...field,
+              options: [...field.options, ""],
+            }
+          : {
+              ...field,
+            }
+      );
     case "remove_option":
       return fieldsState.map((field) =>
-          field.id === action.id &&
-          (field.kind === "DROPDOWN" ||
-            field.kind === "RADIO")
-            ? {
-                ...field,
-                options: field.options.filter(
-                  (_option, index) => action.index !== index
-                ),
-              }
-            : { ...field }
-        )
+        field.id === action.id &&
+        (field.kind === "DROPDOWN" || field.kind === "RADIO")
+          ? {
+              ...field,
+              options: field.options.filter(
+                (_option, index) => action.index !== index
+              ),
+            }
+          : { ...field }
+      );
     case "update_option":
       return fieldsState.map((field) =>
-          field.id === action.id &&
-          (field.kind === "DROPDOWN" ||
-            field.kind === "RADIO" )
-            ? {
-                ...field,
-                options: field.options.map((option, index) =>
-                  action.index === index ? action.content : option
-                ),
-              }
-            : {
-                ...field,
-              }
-        )
+        field.id === action.id &&
+        (field.kind === "DROPDOWN" || field.kind === "RADIO")
+          ? {
+              ...field,
+              options: field.options.map((option, index) =>
+                action.index === index ? action.content : option
+              ),
+            }
+          : {
+              ...field,
+            }
+      );
     default:
-      return fieldsState
+      return fieldsState;
   }
-}
+};
 
-function Form(props: { id: number}) {
-  const [state, dispatchForm] = useReducer(reducer, null)
-  const [fieldsState, dispatchFields] = useReducer(fieldsReducer, [])
+function Form(props: { id: number }) {
+  const [state, dispatchForm] = useReducer(reducer, null);
+  const [fieldsState, dispatchFields] = useReducer(fieldsReducer, []);
   const defaultNewField: newFieldType = {
     label: "",
     type: "text",
@@ -271,16 +300,15 @@ function Form(props: { id: number}) {
   const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    me().then(currentUser => {
-      if(currentUser.username.length === 0) navigate("/")
-    })
+    me().then((currentUser) => {
+      if (currentUser.username.length === 0) navigate("/");
+    });
   }, []);
 
   useEffect(() => {
-    initializeState(props.id, dispatchForm)
-    initializeFields(props.id, dispatchFields)
-  }, [])
-  
+    initializeState(props.id, dispatchForm);
+    initializeFields(props.id, dispatchFields);
+  }, []);
 
   useEffect(() => {
     document.title = "Form Editor";
@@ -338,27 +366,30 @@ function Form(props: { id: number}) {
         {fieldsState.map((field) => {
           switch (field.kind) {
             case "TEXT":
-              return field.meta.description !== "textarea" ?
-                (
-                  <FieldSet
-                    id={field.id}
-                    key={field.id}
-                    label={field.label}
-                    value={field.value}
-                    meta={field.meta}
-                    setLabelContentCB={(id, content) =>
-                      dispatchFields({
-                        type: "update_label",
-                        id: id,
-                        content: content,
-                      })
-                    }
-                    removeFieldCB={(id) =>
-                      dispatchFields({ type: "remove_field", form_id: props.id ,field_id: id })
-                    }
-                  />
-                ) : (
-                  <TextArea
+              return field.meta.description !== "textarea" ? (
+                <FieldSet
+                  id={field.id}
+                  key={field.id}
+                  label={field.label}
+                  value={field.value}
+                  meta={field.meta}
+                  setLabelContentCB={(id, content) =>
+                    dispatchFields({
+                      type: "update_label",
+                      id: id,
+                      content: content,
+                    })
+                  }
+                  removeFieldCB={(id) =>
+                    dispatchFields({
+                      type: "remove_field",
+                      form_id: props.id,
+                      field_id: id,
+                    })
+                  }
+                />
+              ) : (
+                <TextArea
                   id={field.id}
                   key={field.id}
                   label={field.label}
@@ -371,151 +402,161 @@ function Form(props: { id: number}) {
                     })
                   }
                   removeFieldCB={(id) =>
-                    dispatchFields({ type: "remove_field", form_id: props.id ,field_id: id })
+                    dispatchFields({
+                      type: "remove_field",
+                      form_id: props.id,
+                      field_id: id,
+                    })
                   }
                 />
-                )
+              );
             case "DROPDOWN":
-              return field.meta.description === "SINGLE"
-                  ? (
-                    <div key={field.id}>
-                      <div className="flex">
-                        <DropDown
-                          id={field.id}
-                          key={field.id}
-                          label={field.label}
-                          value=""
-                          options={field.options}
-                          setLabelContentCB={(id, content) =>
+              return field.meta.description === "SINGLE" ? (
+                <div key={field.id}>
+                  <div className="flex">
+                    <DropDown
+                      id={field.id}
+                      key={field.id}
+                      label={field.label}
+                      value=""
+                      options={field.options}
+                      setLabelContentCB={(id, content) =>
+                        dispatchFields({
+                          type: "update_label",
+                          id: id,
+                          content: content,
+                        })
+                      }
+                      removeFieldCB={(id) =>
+                        dispatchFields({
+                          type: "remove_field",
+                          form_id: props.id,
+                          field_id: id,
+                        })
+                      }
+                      showOptionsCB={showOptions}
+                    />
+                    <button
+                      onClick={() => {
+                        dispatchFields({ type: "add_option", id: field.id });
+                        setExpandedElement(field.id);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-800 text-white font-bold p-2 mt-10 mr-2 flex-1 h-fit text-center rounded"
+                    >
+                      New
+                    </button>
+                  </div>
+                  {expandedElement === field.id &&
+                    field.options.map((option, ind) => (
+                      <div
+                        className="flex relative left-10 mt-[30px] w-1/2"
+                        key={ind}
+                      >
+                        <input
+                          type="text"
+                          placeholder={`Option ${ind + 1}`}
+                          required={true}
+                          value={option}
+                          onChange={(e) =>
                             dispatchFields({
-                              type: "update_label",
-                              id: id,
-                              content: content,
+                              type: "update_option",
+                              id: field.id,
+                              index: ind,
+                              content: e.target.value,
                             })
                           }
-                          removeFieldCB={(id) =>
-                            dispatchFields({ type: "remove_field", form_id: props.id, field_id: id })
-                          }
-                          showOptionsCB={showOptions}
+                          className="peer relative w-full px-2.5 bg-transparent outline-none z-[1] focus:text-black flex-1"
                         />
                         <button
-                          onClick={() => {
-                            dispatchFields({ type: "add_option", id: field.id });
-                            setExpandedElement(field.id);
-                          }}
-                          className="bg-blue-600 hover:bg-blue-800 text-white font-bold p-2 mt-10 mr-2 flex-1 h-fit text-center rounded"
-                        >
-                          New
-                        </button>
-                      </div>
-                      {expandedElement === field.id &&
-                        field.options.map((option, ind) => (
-                          <div
-                            className="flex relative left-10 mt-[30px] w-1/2"
-                            key={ind}
-                          >
-                            <input
-                              type="text"
-                              placeholder={`Option ${ind + 1}`}
-                              required={true}
-                              value={option}
-                              onChange={(e) =>
-                                dispatchFields({
-                                  type: "update_option",
-                                  id: field.id,
-                                  index: ind,
-                                  content: e.target.value,
-                                })
-                              }
-                              className="peer relative w-full px-2.5 bg-transparent outline-none z-[1] focus:text-black flex-1"
-                            />
-                            <button
-                              className="z-[1] hidden pb-1 peer-hover:block peer-focus:block hover:block focus:block"
-                              onClick={() =>
-                                dispatchFields({
-                                  type: "remove_option",
-                                  id: field.id,
-                                  index: ind,
-                                })
-                              }
-                            >
-                              <TrashIcon className="w-5 h-5" color="red" />
-                            </button>
-                            <i className="absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff]"></i>
-                          </div>
-                        ))}
-                    </div>
-                  )
-                : (
-                    <div key={field.id}>
-                      <div className="flex">
-                        <MultiSelect
-                          id={field.id}
-                          key={field.id}
-                          label={field.label}
-                          options={field.options}
-                          value={field.value}
-                          setLabelContentCB={(id, content) =>
+                          className="z-[1] hidden pb-1 peer-hover:block peer-focus:block hover:block focus:block"
+                          onClick={() =>
                             dispatchFields({
-                              type: "update_label",
-                              id: id,
-                              content: content,
+                              type: "remove_option",
+                              id: field.id,
+                              index: ind,
                             })
                           }
-                          removeFieldCB={(id) =>
-                            dispatchFields({ type: "remove_field", form_id: props.id, field_id:id})
+                        >
+                          <TrashIcon className="w-5 h-5" color="red" />
+                        </button>
+                        <i className="absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff]"></i>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div key={field.id}>
+                  <div className="flex">
+                    <MultiSelect
+                      id={field.id}
+                      key={field.id}
+                      label={field.label}
+                      options={field.options}
+                      value={field.value}
+                      setLabelContentCB={(id, content) =>
+                        dispatchFields({
+                          type: "update_label",
+                          id: id,
+                          content: content,
+                        })
+                      }
+                      removeFieldCB={(id) =>
+                        dispatchFields({
+                          type: "remove_field",
+                          form_id: props.id,
+                          field_id: id,
+                        })
+                      }
+                      showOptionsCB={showOptions}
+                    />
+                    <button
+                      onClick={() => {
+                        dispatchFields({ type: "add_option", id: field.id });
+                        setExpandedElement(field.id);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-800 text-white font-bold p-2 mt-10 mr-2 flex-1 h-fit text-center rounded"
+                    >
+                      New
+                    </button>
+                  </div>
+                  {/*This part displays the options on clicking on multiselect in file edit mode*/}
+                  {expandedElement === field.id &&
+                    field.options.map((option, ind) => (
+                      <div
+                        className="flex relative left-10 mt-[30px] w-1/2"
+                        key={ind}
+                      >
+                        <input
+                          type="text"
+                          placeholder={`Option ${ind + 1}`}
+                          required={true}
+                          value={option}
+                          onChange={(e) =>
+                            dispatchFields({
+                              type: "update_option",
+                              id: field.id,
+                              index: ind,
+                              content: e.target.value,
+                            })
                           }
-                          showOptionsCB={showOptions}
+                          className="peer relative w-full px-2.5 bg-transparent outline-none z-[1] focus:text-black flex-1"
                         />
                         <button
-                          onClick={() => {
-                            dispatchFields({ type: "add_option", id: field.id });
-                            setExpandedElement(field.id);
-                          }}
-                          className="bg-blue-600 hover:bg-blue-800 text-white font-bold p-2 mt-10 mr-2 flex-1 h-fit text-center rounded"
+                          className="z-[1] hidden peer-hover:block peer-focus:block pb-1"
+                          onClick={() =>
+                            dispatchFields({
+                              type: "remove_option",
+                              id: field.id,
+                              index: ind,
+                            })
+                          }
                         >
-                          New
+                          <TrashIcon className="w-5 h-5" color="red" />
                         </button>
+                        <i className="absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff]"></i>
                       </div>
-                      {/*This part displays the options on clicking on multiselect in file edit mode*/}
-                      {expandedElement === field.id &&
-                        field.options.map((option, ind) => (
-                          <div
-                            className="flex relative left-10 mt-[30px] w-1/2"
-                            key={ind}
-                          >
-                            <input
-                              type="text"
-                              placeholder={`Option ${ind + 1}`}
-                              required={true}
-                              value={option}
-                              onChange={(e) =>
-                                dispatchFields({
-                                  type: "update_option",
-                                  id: field.id,
-                                  index: ind,
-                                  content: e.target.value,
-                                })
-                              }
-                              className="peer relative w-full px-2.5 bg-transparent outline-none z-[1] focus:text-black flex-1"
-                            />
-                            <button
-                              className="z-[1] hidden peer-hover:block peer-focus:block pb-1"
-                              onClick={() =>
-                                dispatchFields({
-                                  type: "remove_option",
-                                  id: field.id,
-                                  index: ind,
-                                })
-                              }
-                            >
-                              <TrashIcon className="w-5 h-5" color="red" />
-                            </button>
-                            <i className="absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff]"></i>
-                          </div>
-                        ))}
-                    </div>
-                  );
+                    ))}
+                </div>
+              );
             case "RADIO":
               return (
                 <div key={field.id}>
@@ -534,7 +575,11 @@ function Form(props: { id: number}) {
                         })
                       }
                       removeFieldCB={(id) =>
-                        dispatchFields({ type: "remove_field", form_id: props.id, field_id:id})
+                        dispatchFields({
+                          type: "remove_field",
+                          form_id: props.id,
+                          field_id: id,
+                        })
                       }
                       showOptionsCB={showOptions}
                     />
@@ -634,7 +679,7 @@ function Form(props: { id: number}) {
             "tel",
             "url",
             "range",
-            "time"
+            "time",
           ].map((type) => (
             <option key={type} value={type}>
               {type}
@@ -652,7 +697,6 @@ function Form(props: { id: number}) {
               callback: () => dispatch({ type: "clear_text" }),
             })
           }
-
         >
           Add Field
         </button>

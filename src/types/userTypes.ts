@@ -1,3 +1,3 @@
 type User = any;
 
-export type {User}
+export type { User };

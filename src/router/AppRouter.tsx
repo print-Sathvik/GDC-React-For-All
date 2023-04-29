@@ -15,14 +15,26 @@ const routes = {
   "/login": () => <Login />,
   "/about": () => <About />,
   "/forms/:id": ({ id }: { id: string }) => <Form id={Number(id)} />,
-  "/submissions/:formId": ({ formId }: { formId: string }) => <Submissions id={Number(formId)} />,
-  "/forms/:formId/submission/new": ({ formId }: { formId: string }) => <NewSubmission formId={Number(formId)} />,
-  "/forms/:formId/submission/:submmissionId": ({ formId, submmissionId }: { formId: string, submmissionId: string }) => (
+  "/submissions/:formId": ({ formId }: { formId: string }) => (
+    <Submissions id={Number(formId)} />
+  ),
+  "/forms/:formId/submission/new": ({ formId }: { formId: string }) => (
+    <NewSubmission formId={Number(formId)} />
+  ),
+  "/forms/:formId/submission/:submmissionId": ({
+    formId,
+    submmissionId,
+  }: {
+    formId: string;
+    submmissionId: string;
+  }) => (
     <Preview formId={Number(formId)} submissionId={Number(submmissionId)} />
   ),
 };
 
-export default function AppRouter(props: {currentUser:User}) {
+export default function AppRouter(props: { currentUser: User }) {
   let routeResult = useRoutes(routes);
-  return <AppContainer currentUser={props.currentUser}>{routeResult}</AppContainer>;
+  return (
+    <AppContainer currentUser={props.currentUser}>{routeResult}</AppContainer>
+  );
 }

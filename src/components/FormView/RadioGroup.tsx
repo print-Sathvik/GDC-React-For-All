@@ -1,6 +1,6 @@
 import React from "react";
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
-import { TrashIcon } from '@heroicons/react/24/outline'
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 export default function RadioGroup(props: {
   id: number;

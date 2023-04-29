@@ -1,12 +1,12 @@
-import { Fragment, ReactNode } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
+import { Fragment, ReactNode } from "react";
+import { Dialog, Transition } from "@headlessui/react";
 
 export default function Modal(props: {
-  children: ReactNode,
-  open: boolean,
-  closeCB: () => void
+  children: ReactNode;
+  open: boolean;
+  closeCB: () => void;
 }) {
-  const {children, open, closeCB} = props
+  const { children, open, closeCB } = props;
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -35,14 +35,12 @@ export default function Modal(props: {
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <div className="inline-block align-bottom bg-white rounded text-left overflow-hidden shadow-xl min-w-3xl w-1/3">
-                <div className='p-4'>
-                  {children}
-                </div>
+                <div className="p-4">{children}</div>
               </div>
             </Transition.Child>
           </div>
         </div>
       </Dialog>
     </Transition.Root>
-  )
+  );
 }

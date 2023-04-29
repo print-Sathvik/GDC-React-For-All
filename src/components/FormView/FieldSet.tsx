@@ -1,11 +1,21 @@
 import React from "react";
-import { TrashIcon } from '@heroicons/react/24/outline'
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 export default function FieldSet(props: {
   id: number;
   label: string;
   value: string;
-  meta?: {description: "text" | "textarea" | "tel" | "password" | "email" | "url" | "time" | "date"};
+  meta?: {
+    description:
+      | "text"
+      | "textarea"
+      | "tel"
+      | "password"
+      | "email"
+      | "url"
+      | "time"
+      | "date";
+  };
   setFieldContentCB?: (id: number, content: string) => void;
   setLabelContentCB?: (id: number, content: string) => void;
   removeFieldCB?: (id: number) => void;
@@ -15,7 +25,7 @@ export default function FieldSet(props: {
     <div key={props.id} className="relative w-full mt-[30px]">
       <div className="flex">
         <input
-          type= "text" //{props.meta?.description}
+          type="text" //{props.meta?.description}
           required={true}
           //disabling input field if setLabelContent prop is absent because it is present only when editing form,
           //and absent while answering the form in preview mode
