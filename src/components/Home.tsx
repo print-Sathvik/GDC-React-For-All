@@ -113,7 +113,7 @@ export default function Home() {
       </div>
       <PageNav offSet={offset} limit={2} setOffsetCB={setOffset} />
       <Modal open={newForm} closeCB={() => setNewForm(false)}>
-        <CreateForm />
+        <CreateForm closeCB={() => setNewForm(false)} />
       </Modal>
     </div>
   );

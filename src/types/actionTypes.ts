@@ -17,6 +17,8 @@ type AddAction = {
 type UpdateTitleAction = {
   type: "update_title";
   title: string;
+  description: string;
+  is_public: boolean
 };
 
 type UpdateLabelAction = {

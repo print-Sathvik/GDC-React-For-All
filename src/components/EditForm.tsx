@@ -1,17 +1,29 @@
 import React, { useState } from "react";
-import { Errors, formData, validateForm } from "../types/formTypes";
-import { createForm } from "../utils/apiUtils";
-import { navigate } from "raviger";
+import { Errors, Form, formData, validateForm } from "../types/formTypes";
+import { patchFormData } from "../utils/apiUtils";
 
-export default function CreateForm(props: {closeCB: () => void}) {
+const saveFormData = async (form: formData, ) => {
+  try {
+    await patchFormData(form.id ?? 0, {
+      title: form.title,
+      description: form.description ?? "",
+      is_public: form.is_public ?? false,
+    });
+
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export default function EditForm(props: {closeCB: () => void, form: formData, setFormStateCB: (title: string, description: string, is_public: boolean)=>void}) {
   const [form, setForm] = useState<formData>({
-    id: 0,
-    title: "",
-    description: "",
-    is_public: false,
+    id: props.form.id,
+    title: props.form.title,
+    description: props.form.description ?? "",
+    is_public: props.form.is_public,
   });
 
-  const [errors, setErrors] = useState<Errors<formData>>({});
+  const [errors, setErrors] = useState<Errors<Form>>({});
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,8 +37,9 @@ export default function CreateForm(props: {closeCB: () => void}) {
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
       try {
-        const data = await createForm(form);
-        navigate(`/forms/${data.id}`);
+        await saveFormData(form);
+        props.setFormStateCB(form.title, form.description ?? "", form.is_public)
+        props.closeCB();
       } catch (error) {
         console.log(error);
       }
@@ -84,14 +97,14 @@ export default function CreateForm(props: {closeCB: () => void}) {
             name="is_public"
             id="is_public"
             role="switch"
-            value={form.is_public ? "true" : "false"}
+            checked={form.is_public}
             onChange={(e) => {
               setForm({ ...form, is_public: e.target.checked });
             }}
           />
           <label
             htmlFor="is_public"
-            className={`${errors.is_public ? "text-red-500" : ""}  ml-3 cursor-pointer`}
+            className={`${errors.is_public ? "text-red-500" : ""}`}
           >
             Is Public
           </label>
@@ -103,7 +116,7 @@ export default function CreateForm(props: {closeCB: () => void}) {
           type="submit"
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
-          Create
+          Update
         </button>
         <button type="button"
         onClick={props.closeCB}

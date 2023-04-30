@@ -3,9 +3,9 @@ type formData = {
   title: string;
   description: string | null;
   is_public: boolean;
-  created_by: number;
-  created_date: string;
-  modified_date: string;
+  created_by?: number;
+  created_date?: string;
+  modified_date?: string;
 };
 
 type Form = {
@@ -17,7 +17,7 @@ type Form = {
 
 type Errors<T> = Partial<Record<keyof T, string>>;
 
-export const validateForm = (form: Form) => {
+export const validateForm = (form: formData) => {
   const errors: Errors<Form> = {};
   if (form.title.length < 1) {
     errors.title = "Title is Required";

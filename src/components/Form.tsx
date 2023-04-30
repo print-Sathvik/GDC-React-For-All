@@ -19,16 +19,11 @@ import {
   getFormData,
   me,
   patchField,
-  patchFormData,
   postField,
 } from "../utils/apiUtils";
-import { TrashIcon } from "@heroicons/react/24/outline";
-
-const getLocalForms: () => formData[] = () => {
-  const savedFormsJSON = localStorage.getItem("savedForms");
-  const persistantormFields = savedFormsJSON ? JSON.parse(savedFormsJSON) : [];
-  return persistantormFields;
-};
+import { TrashIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import Modal from "./common/Modal";
+import EditForm from "./EditForm";
 
 const initializeState = async (
   form_id: number,
@@ -37,7 +32,6 @@ const initializeState = async (
   try {
     const parsedData = await getFormData(form_id);
     dispatchFormCB({ type: "render_form", form: parsedData });
-    console.log("dispatched", parsedData);
   } catch (error) {
     console.log(error);
   }
@@ -51,18 +45,6 @@ const initializeFields = async (
     const parsedFields = await getFields(form_id);
     dispatchFieldsCB({ type: "render_fields", fields: parsedFields.results });
   } catch (error) {}
-};
-
-const saveFormData = async (currentState: formData) => {
-  try {
-    await patchFormData(currentState.id, {
-      title: currentState.title,
-      description: currentState.description,
-      is_public: currentState.is_public,
-    });
-  } catch (error) {
-    console.log(error);
-  }
 };
 
 const addField = async (form_id: number, newField: formField) => {
@@ -162,23 +144,6 @@ const getNewFormFields: (type: textFieldType, label: string) => formField = (
         value: "",
         meta: { description: "MULTIPLE" },
       };
-    // case "textarea":
-    //   return {
-    //     kind: "textarea",
-    //     id: Number(new Date()),
-    //     label: label,
-    //     fieldType: type,
-    //     value: "",
-    //   };
-    default:
-      return {
-        kind: "TEXT",
-        id: Number(new Date()),
-        label: label,
-        value: "",
-        options: [],
-        meta: { description: "text" },
-      };
   }
 };
 
@@ -203,7 +168,7 @@ const reducer: (
 
   switch (action.type) {
     case "update_title":
-      return { ...state, title: action.title };
+      return { ...state, title: action.title, description: action.description, is_public: action.is_public };
     default:
       return state;
   }
@@ -288,6 +253,7 @@ const fieldsReducer: (
 function Form(props: { id: number }) {
   const [state, dispatchForm] = useReducer(reducer, null);
   const [fieldsState, dispatchFields] = useReducer(fieldsReducer, []);
+  const [edit, setEdit] = useState<boolean>(false)
   const defaultNewField: newFieldType = {
     label: "",
     type: "text",
@@ -319,15 +285,15 @@ function Form(props: { id: number }) {
     };
   }, []);
 
-  useEffect(() => {
-    let timeout = setTimeout(() => {
-      state && saveFormData(state);
-    }, 1000);
+  // useEffect(() => {
+  //   let timeout = setTimeout(() => {
+  //     state && saveFormData(state);
+  //   }, 1000);
 
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [state]);
+  //   return () => {
+  //     clearTimeout(timeout);
+  //   };
+  // }, [state]);
 
   useEffect(() => {
     let timeout = setTimeout(() => {
@@ -347,22 +313,15 @@ function Form(props: { id: number }) {
   return (
     <div className="flex flex-col gap-2 p-4 pt-0 divide-y-2 divide-dotted">
       <div>
-        <div className="inputSet relative w-full mt-[35px]">
-          <input
-            type="text"
-            required={true}
-            value={state ? state.title : ""}
-            ref={titleRef}
-            onChange={(e) =>
-              dispatchForm({ type: "update_title", title: e.target.value })
-            }
-            className="peer relative w-full pt-5 px-2.5 pb-2.5 bg-transparent outline-none z-[1] invalid:text-transparent focus:text-black duration-500 flex-1"
-          />
-          <label className="absolute left-0 text-[#8f8f8f] pt-5 px-2.5 pb-2.5 peer-hover:text-[#45f3ff] peer-focus:text-[#45f3ff] peer-valid:text-[#45f3ff] peer-focus:-translate-y-8 peer-valid:-translate-y-8 peer-focus:text-[14px] peer-valid:text-[14px] duration-500">
-            Form Title
-          </label>
-          <i className="peer-focus:h-11 peer-valid:h-11 absolute left-0 bottom-0 w-full h-0.5 rounded bg-[#45f3ff] duration-500"></i>
+        <div className="inputSet relative w-full mt-2 items-center justify-center flex">
+          <h2
+            className="relative font-semibold px-2.5 flex-none"
+          >{state ? state.title : ""}</h2>
+          <PencilSquareIcon onClick={() => setEdit(true)} className="w-5 h-5 flex-none cursor-pointer" color="blue" />
         </div>
+        {state && <Modal open={edit} closeCB={() => setEdit(false)}>
+          <EditForm closeCB={() => setEdit(false)} form={state} setFormStateCB={(title: string, description: string, is_public: boolean) => {dispatchForm({type: "update_title", title:title, description:description, is_public:is_public})}} />
+        </Modal>}
         {fieldsState.map((field) => {
           switch (field.kind) {
             case "TEXT":
@@ -703,7 +662,9 @@ function Form(props: { id: number }) {
       </div>
       <div className="text-center">
         <button
-          onClick={(_e) => state && saveFormData(state)}
+          onClick={(_e) => {
+            saveFields(props.id, fieldsState)
+          }}
           className="bg-blue-600 hover:bg-blue-800 text-white font-bold px-3 py-2 mt-4 mr-2 rounded"
         >
           Save
@@ -721,4 +682,3 @@ function Form(props: { id: number }) {
 
 export type { formData, formField };
 export default Form;
-export { getLocalForms, saveFormData };

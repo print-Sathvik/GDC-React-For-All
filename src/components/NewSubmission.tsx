@@ -273,7 +273,7 @@ export default function NewSubmission(props: { formId: number }) {
             </div>
           )}
         </div>
-        <div>
+        <div className="w-full h-14">
           {currentFieldIndex !== 0 && (
             <button
               onClick={(_) => setCurFieldIndex(currentFieldIndex - 1)}
@@ -291,6 +291,7 @@ export default function NewSubmission(props: { formId: number }) {
             </button>
           )}
         </div>
+        <div className="text-center">
         <button
           className="bg-blue-600 hover:bg-blue-800 rounded p-2 text-white font-bold"
           onClick={(_) => {
@@ -302,6 +303,7 @@ export default function NewSubmission(props: { formId: number }) {
         >
           Submit
         </button>
+        </div>
       </div>
     );
   }
