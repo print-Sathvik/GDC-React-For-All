@@ -3,7 +3,7 @@ import { Errors, formData, validateForm } from "../types/formTypes";
 import { createForm } from "../utils/apiUtils";
 import { navigate } from "raviger";
 
-export default function CreateForm(props: {closeCB: () => void}) {
+export default function CreateForm(props: { closeCB: () => void }) {
   const [form, setForm] = useState<formData>({
     id: 0,
     title: "",
@@ -91,7 +91,9 @@ export default function CreateForm(props: {closeCB: () => void}) {
           />
           <label
             htmlFor="is_public"
-            className={`${errors.is_public ? "text-red-500" : ""}  ml-3 cursor-pointer`}
+            className={`${
+              errors.is_public ? "text-red-500" : ""
+            }  ml-3 cursor-pointer`}
           >
             Is Public
           </label>
@@ -105,9 +107,13 @@ export default function CreateForm(props: {closeCB: () => void}) {
         >
           Create
         </button>
-        <button type="button"
-        onClick={props.closeCB}
-        className="m-3 inline-flex float-right w-full justify-center rounded bg-white px-3 py-2 font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancel</button>
+        <button
+          type="button"
+          onClick={props.closeCB}
+          className="m-3 inline-flex float-right w-full justify-center rounded bg-white px-3 py-2 font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+        >
+          Cancel
+        </button>
       </form>
     </div>
   );

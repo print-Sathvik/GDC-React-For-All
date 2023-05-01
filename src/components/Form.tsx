@@ -168,7 +168,12 @@ const reducer: (
 
   switch (action.type) {
     case "update_title":
-      return { ...state, title: action.title, description: action.description, is_public: action.is_public };
+      return {
+        ...state,
+        title: action.title,
+        description: action.description,
+        is_public: action.is_public,
+      };
     default:
       return state;
   }
@@ -253,7 +258,7 @@ const fieldsReducer: (
 function Form(props: { id: number }) {
   const [state, dispatchForm] = useReducer(reducer, null);
   const [fieldsState, dispatchFields] = useReducer(fieldsReducer, []);
-  const [edit, setEdit] = useState<boolean>(false)
+  const [edit, setEdit] = useState<boolean>(false);
   const defaultNewField: newFieldType = {
     label: "",
     type: "text",
@@ -285,16 +290,6 @@ function Form(props: { id: number }) {
     };
   }, []);
 
-  // useEffect(() => {
-  //   let timeout = setTimeout(() => {
-  //     state && saveFormData(state);
-  //   }, 1000);
-
-  //   return () => {
-  //     clearTimeout(timeout);
-  //   };
-  // }, [state]);
-
   useEffect(() => {
     let timeout = setTimeout(() => {
       saveFields(props.id, fieldsState);
@@ -314,14 +309,35 @@ function Form(props: { id: number }) {
     <div className="flex flex-col gap-2 p-4 pt-0 divide-y-2 divide-dotted">
       <div>
         <div className="inputSet relative w-full mt-2 items-center justify-center flex">
-          <h2
-            className="relative font-semibold px-2.5 flex-none"
-          >{state ? state.title : ""}</h2>
-          <PencilSquareIcon onClick={() => setEdit(true)} className="w-5 h-5 flex-none cursor-pointer" color="blue" />
+          <h2 className="relative font-semibold px-2.5 flex-none">
+            {state ? state.title : ""}
+          </h2>
+          <PencilSquareIcon
+            onClick={() => setEdit(true)}
+            className="w-5 h-5 flex-none cursor-pointer"
+            color="blue"
+          />
         </div>
-        {state && <Modal open={edit} closeCB={() => setEdit(false)}>
-          <EditForm closeCB={() => setEdit(false)} form={state} setFormStateCB={(title: string, description: string, is_public: boolean) => {dispatchForm({type: "update_title", title:title, description:description, is_public:is_public})}} />
-        </Modal>}
+        {state && (
+          <Modal open={edit} closeCB={() => setEdit(false)}>
+            <EditForm
+              closeCB={() => setEdit(false)}
+              form={state}
+              setFormStateCB={(
+                title: string,
+                description: string,
+                is_public: boolean
+              ) => {
+                dispatchForm({
+                  type: "update_title",
+                  title: title,
+                  description: description,
+                  is_public: is_public,
+                });
+              }}
+            />
+          </Modal>
+        )}
         {fieldsState.map((field) => {
           switch (field.kind) {
             case "TEXT":
@@ -637,7 +653,6 @@ function Form(props: { id: number }) {
             "password",
             "tel",
             "url",
-            "range",
             "time",
           ].map((type) => (
             <option key={type} value={type}>
@@ -663,7 +678,7 @@ function Form(props: { id: number }) {
       <div className="text-center">
         <button
           onClick={(_e) => {
-            saveFields(props.id, fieldsState)
+            saveFields(props.id, fieldsState);
           }}
           className="bg-blue-600 hover:bg-blue-800 text-white font-bold px-3 py-2 mt-4 mr-2 rounded"
         >

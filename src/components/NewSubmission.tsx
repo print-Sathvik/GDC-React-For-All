@@ -292,17 +292,17 @@ export default function NewSubmission(props: { formId: number }) {
           )}
         </div>
         <div className="text-center">
-        <button
-          className="bg-blue-600 hover:bg-blue-800 rounded p-2 text-white font-bold"
-          onClick={(_) => {
-            state &&
-              saveSubmission(props.formId, state)
-                .then(() => navigate(`/submissions/${props.formId}`))
-                .catch(() => navigate(`/submissions/${props.formId}`));
-          }}
-        >
-          Submit
-        </button>
+          <button
+            className="bg-blue-600 hover:bg-blue-800 rounded p-2 text-white font-bold"
+            onClick={(_) => {
+              state &&
+                saveSubmission(props.formId, state)
+                  .then(() => navigate(`/submissions/${props.formId}`))
+                  .catch(() => navigate(`/submissions/${props.formId}`));
+            }}
+          >
+            Submit
+          </button>
         </div>
       </div>
     );
