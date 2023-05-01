@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Link, useQueryParams } from "raviger";
+import React, { useCallback, useEffect, useState } from "react";
+import { Link, navigate, useQueryParams } from "raviger";
 import { Form } from "../types/formTypes";
 import Modal from "./common/Modal";
 import CreateForm from "./CreateForm";
 import { deleteForm, listForms, me } from "../utils/apiUtils";
-import { Pagination } from "../types/common";
+import { LIMIT, Pagination } from "../types/common";
 import PageNav from "./common/PageNav";
 import { PencilSquareIcon } from "@heroicons/react/20/solid";
 import { TrashIcon, EyeIcon } from "@heroicons/react/24/outline";
@@ -40,7 +40,7 @@ const removeForm = async (formId: number) => {
 };
 
 export default function Home() {
-  const [savedFormsState, setFormsState] = useState<Form[]>([]);
+  const [savedFormsState, setFormsState] = useState<Form[] | null>(null);
   const [{ search }, setQuery] = useQueryParams();
   const [searchString, setSearchString] = useState("");
   const [newForm, setNewForm] = useState(false);
@@ -49,6 +49,22 @@ export default function Home() {
   useEffect(() => {
     fetchForms(offset, setFormsState);
   }, [offset]);
+
+  const openForm = useCallback((e: { key: any; }) => {
+    console.log(e.key, savedFormsState)
+    if('123456789'.includes(e.key) && savedFormsState!==null && savedFormsState.length >= Number(e.key)) {
+      navigate(`/forms/${savedFormsState[Number(e.key) - 1]?.id}/`)
+    }
+  }, [savedFormsState])
+
+  useEffect(() => {
+    document.addEventListener('keydown', openForm)
+
+    return () => {
+      document.removeEventListener('keydown', openForm)
+    }
+  }, [openForm, savedFormsState])
+
 
   return (
     //This renders form title, edit and delte buttons and a button to create new form
@@ -111,7 +127,7 @@ export default function Home() {
           New Form
         </button>
       </div>
-      <PageNav offSet={offset} limit={2} setOffsetCB={setOffset} />
+      <PageNav offSet={offset} limit={LIMIT} setOffsetCB={setOffset} />
       <Modal open={newForm} closeCB={() => setNewForm(false)}>
         <CreateForm closeCB={() => setNewForm(false)} />
       </Modal>

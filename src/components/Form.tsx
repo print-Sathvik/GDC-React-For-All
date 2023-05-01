@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useRef, useReducer } from "react";
+import React, { useState, useEffect, useReducer, useCallback } from "react";
 import FieldSet from "./FormView/FieldSet";
 import { Link, navigate } from "raviger";
 import {
@@ -263,7 +263,9 @@ function Form(props: { id: number }) {
   //Elements like deopdown, radio button group, multiselect, can be expanded to see/edit options while creating form
   //Only 1 element can be expanded
   const [expandedElement, setExpandedElement] = useState(0);
-  const titleRef = useRef<HTMLInputElement>(null);
+  const [currentFocus, setCurrentFocus] = useState<number>(0)
+  //currentFocus will save the index of field which is currently focussed(1st field by default)
+  //so that focus can be changed based on keyboard events to navigate the fields
 
   useEffect(() => {
     me().then((currentUser) => {
@@ -277,25 +279,6 @@ function Form(props: { id: number }) {
   }, []);
 
   useEffect(() => {
-    document.title = "Form Editor";
-    titleRef.current?.focus();
-
-    return () => {
-      document.title = "Home Page";
-    };
-  }, []);
-
-  // useEffect(() => {
-  //   let timeout = setTimeout(() => {
-  //     state && saveFormData(state);
-  //   }, 1000);
-
-  //   return () => {
-  //     clearTimeout(timeout);
-  //   };
-  // }, [state]);
-
-  useEffect(() => {
     let timeout = setTimeout(() => {
       saveFields(props.id, fieldsState);
     }, 1000);
@@ -305,11 +288,25 @@ function Form(props: { id: number }) {
     };
   }, [fieldsState]);
 
+  const changeFocus = useCallback((e: { key: any; }) => {
+    console.log(e.key, fieldsState.length)
+    if(e.key === 'ArrowUp' && currentFocus > 0) setCurrentFocus(currentFocus => currentFocus - 1)
+    else if(e.key === 'ArrowDown' && currentFocus < fieldsState.length-1) setCurrentFocus(currentFocus => currentFocus + 1)
+  }, [fieldsState, currentFocus])
+
+  useEffect(() => {
+    document.addEventListener('keyup', changeFocus)
+    return () => {
+      document.removeEventListener('keyup', changeFocus)
+    }
+  }, [fieldsState, currentFocus])
+
   const showOptions: (id: number) => void = (id) => {
     //If same element is clicked close it if its open, if different element is clicked, then open that element
     id === expandedElement ? setExpandedElement(0) : setExpandedElement(id);
   };
 
+  console.log(currentFocus)
   return (
     <div className="flex flex-col gap-2 p-4 pt-0 divide-y-2 divide-dotted">
       <div>
@@ -331,6 +328,7 @@ function Form(props: { id: number }) {
                   key={field.id}
                   label={field.label}
                   value={field.value}
+                  focus={field.id === fieldsState[currentFocus].id}
                   meta={field.meta}
                   setLabelContentCB={(id, content) =>
                     dispatchFields({
@@ -353,6 +351,7 @@ function Form(props: { id: number }) {
                   key={field.id}
                   label={field.label}
                   value={field.value}
+                  focus={field.id === fieldsState[currentFocus].id}
                   setLabelContentCB={(id, content) =>
                     dispatchFields({
                       type: "update_label",
@@ -379,6 +378,7 @@ function Form(props: { id: number }) {
                       label={field.label}
                       value=""
                       options={field.options}
+                      focus={field.id === fieldsState[currentFocus].id}
                       setLabelContentCB={(id, content) =>
                         dispatchFields({
                           type: "update_label",
@@ -450,6 +450,7 @@ function Form(props: { id: number }) {
                       key={field.id}
                       label={field.label}
                       options={field.options}
+                      focus={field.id === fieldsState[currentFocus].id}
                       value={field.value}
                       setLabelContentCB={(id, content) =>
                         dispatchFields({
@@ -526,6 +527,7 @@ function Form(props: { id: number }) {
                       label={field.label}
                       value=""
                       options={field.options}
+                      focus={field.id === fieldsState[currentFocus].id}
                       setLabelContentCB={(id, content) =>
                         dispatchFields({
                           type: "update_label",
