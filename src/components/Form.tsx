@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef, useReducer } from "react";
 import FieldSet from "./FormView/FieldSet";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import {
   formData,
   formField,
@@ -17,13 +17,13 @@ import {
   deleteFieldreq,
   getFields,
   getFormData,
-  me,
   patchField,
   postField,
 } from "../utils/apiUtils";
 import { TrashIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import Modal from "./common/Modal";
 import EditForm from "./EditForm";
+import { User } from "../types/userTypes";
 
 const initializeState = async (
   form_id: number,
@@ -44,7 +44,9 @@ const initializeFields = async (
   try {
     const parsedFields = await getFields(form_id);
     dispatchFieldsCB({ type: "render_fields", fields: parsedFields.results });
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const addField = async (form_id: number, newField: formField) => {
@@ -255,7 +257,7 @@ const fieldsReducer: (
   }
 };
 
-function Form(props: { id: number }) {
+function Form(props: { id: number; currentUser: User }) {
   const [state, dispatchForm] = useReducer(reducer, null);
   const [fieldsState, dispatchFields] = useReducer(fieldsReducer, []);
   const [edit, setEdit] = useState<boolean>(false);
@@ -269,12 +271,6 @@ function Form(props: { id: number }) {
   //Only 1 element can be expanded
   const [expandedElement, setExpandedElement] = useState(0);
   const titleRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    me().then((currentUser) => {
-      if (currentUser.username.length === 0) navigate("/");
-    });
-  }, []);
 
   useEffect(() => {
     initializeState(props.id, dispatchForm);
@@ -304,6 +300,9 @@ function Form(props: { id: number }) {
     //If same element is clicked close it if its open, if different element is clicked, then open that element
     id === expandedElement ? setExpandedElement(0) : setExpandedElement(id);
   };
+
+  if (props.currentUser?.username === "" || props.currentUser === null)
+    return <p className="p-4">Please login to create/view forms</p>;
 
   return (
     <div className="flex flex-col gap-2 p-4 pt-0 divide-y-2 divide-dotted">
@@ -613,7 +612,7 @@ function Form(props: { id: number }) {
                 </div>
               );
             default:
-              return <div>No such field exists</div>;
+              return <div key="nofield">No such field exists</div>;
           }
         })}
       </div>

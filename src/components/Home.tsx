@@ -3,27 +3,25 @@ import { Link, useQueryParams } from "raviger";
 import { Form } from "../types/formTypes";
 import Modal from "./common/Modal";
 import CreateForm from "./CreateForm";
-import { deleteForm, listForms, me } from "../utils/apiUtils";
+import { deleteForm, listForms } from "../utils/apiUtils";
 import { Pagination } from "../types/common";
 import PageNav from "./common/PageNav";
 import { PencilSquareIcon } from "@heroicons/react/20/solid";
 import { TrashIcon, EyeIcon } from "@heroicons/react/24/outline";
+import { User } from "../types/userTypes";
 
 const fetchForms = async (
   offset: number,
-  setFormsCB: (value: Form[]) => void
+  setFormsCB: (value: Form[]) => void,
+  setCountCB: (count: number) => void
 ) => {
   try {
-    const currentUser = await me();
-    if (currentUser.username === "") {
-      setFormsCB([]);
-      return;
-    }
     const parsedResponse: Pagination<Form> = await listForms({
       offset: offset,
       limit: 2,
     });
     setFormsCB(parsedResponse.results);
+    setCountCB(parsedResponse.count);
   } catch (error) {
     console.log(error);
     return false;
@@ -39,16 +37,20 @@ const removeForm = async (formId: number) => {
   }
 };
 
-export default function Home() {
+export default function Home(props: { currentUser: User }) {
   const [savedFormsState, setFormsState] = useState<Form[]>([]);
   const [{ search }, setQuery] = useQueryParams();
   const [searchString, setSearchString] = useState("");
   const [newForm, setNewForm] = useState(false);
   const [offset, setOffset] = useState<number>(0);
+  const [count, setCount] = useState<number>(0);
 
   useEffect(() => {
-    fetchForms(offset, setFormsState);
+    fetchForms(offset, setFormsState, setCount);
   }, [offset]);
+
+  if (props.currentUser?.username === "")
+    return <p className="p-4">Please login to create/view forms</p>;
 
   return (
     //This renders form title, edit and delte buttons and a button to create new form
@@ -111,7 +113,12 @@ export default function Home() {
           New Form
         </button>
       </div>
-      <PageNav offSet={offset} limit={2} setOffsetCB={setOffset} />
+      <PageNav
+        offSet={offset}
+        limit={2}
+        count={count}
+        setOffsetCB={setOffset}
+      />
       <Modal open={newForm} closeCB={() => setNewForm(false)}>
         <CreateForm closeCB={() => setNewForm(false)} />
       </Modal>

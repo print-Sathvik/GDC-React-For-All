@@ -117,8 +117,3 @@ export const postSubmission = async (
 ) => {
   return request(`forms/${form_pk}/submission/`, "POST", submission);
 };
-
-export const getFormsCount = async () => {
-  const allFormsData = await request(`forms/`, "GET", { offset: 0, limit: 1 });
-  return allFormsData.count;
-};

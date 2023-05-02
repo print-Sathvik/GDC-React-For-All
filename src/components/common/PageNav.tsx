@@ -5,31 +5,15 @@ import {
   ChevronDoubleRightIcon,
   ChevronDoubleLeftIcon,
 } from "@heroicons/react/20/solid";
-import React, { useEffect, useState } from "react";
-import { getFormsCount } from "../../utils/apiUtils";
-
-const initializeFormsCount = async (
-  setCountCB: React.Dispatch<React.SetStateAction<number>>
-) => {
-  try {
-    let count = await getFormsCount();
-    setCountCB(count);
-  } catch (error) {
-    console.log(error);
-  }
-};
+import React, { useState } from "react";
 
 export default function PageNav(props: {
   offSet: number;
   limit: number;
+  count: number;
   setOffsetCB: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const [count, setCount] = useState<number>(0);
   const [start, setStart] = useState<number>(1);
-
-  useEffect(() => {
-    initializeFormsCount(setCount);
-  }, []);
 
   const renderPgNo = () => {
     let allPageNos = [];
@@ -67,9 +51,9 @@ export default function PageNav(props: {
           <p className="text-sm text-gray-700">
             Showing <span className="font-medium">{props.offSet + 1}</span> to{" "}
             <span className="font-medium">
-              {Math.min(props.offSet + props.limit, count)}
+              {Math.min(props.offSet + props.limit, props.count)}
             </span>{" "}
-            of <span className="font-medium">{count}</span> results
+            of <span className="font-medium">{props.count}</span> results
           </p>
         </div>
         <div>
@@ -105,11 +89,11 @@ export default function PageNav(props: {
             <a
               onClick={(_) => {
                 Math.ceil((props.offSet + 1) / props.limit) <
-                  Math.ceil(count / props.limit) &&
+                  Math.ceil(props.count / props.limit) &&
                   props.setOffsetCB(props.offSet + props.limit);
                 if (
                   props.offSet >= props.limit * 2 &&
-                  start <= Math.ceil(count / props.limit) - 3
+                  start <= Math.ceil(props.count / props.limit) - 3
                 ) {
                   setStart(start + 1);
                 }
@@ -121,9 +105,10 @@ export default function PageNav(props: {
             </a>
             <a
               onClick={(_) => {
-                setStart(Math.ceil(count / props.limit) - 2);
+                setStart(Math.ceil(props.count / props.limit) - 2);
                 props.setOffsetCB(
-                  Math.ceil((count - props.limit) / props.limit) * props.limit
+                  Math.ceil((props.count - props.limit) / props.limit) *
+                    props.limit
                 );
               }}
               className="relative inline-flex items-center cursor-pointer rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
