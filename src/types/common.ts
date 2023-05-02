@@ -1,4 +1,4 @@
-export const LIMIT: number = 2
+export const LIMIT: number = 2;
 
 export type Pagination<T> = {
   count: number;

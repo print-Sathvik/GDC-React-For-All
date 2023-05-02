@@ -50,21 +50,29 @@ export default function Home() {
     fetchForms(offset, setFormsState);
   }, [offset]);
 
-  const openForm = useCallback((e: { key: any; }) => {
-    console.log(e.key, savedFormsState)
-    if('123456789'.includes(e.key) && savedFormsState!==null && savedFormsState.length >= Number(e.key)) {
-      navigate(`/forms/${savedFormsState[Number(e.key) - 1]?.id}/`)
-    }
-  }, [savedFormsState])
+  const openForm = useCallback(
+    (e: KeyboardEvent) => {
+      console.log(e.key);
+      if (
+        "123456789".includes(e.key) &&
+        savedFormsState !== null &&
+        savedFormsState.length >= Number(e.key)
+      ) {
+        navigate(`/forms/${savedFormsState[Number(e.key) - 1]?.id}/`);
+      } else if (e.shiftKey && e.code === "KeyN") {
+        setNewForm(true);
+      }
+    },
+    [savedFormsState]
+  );
 
   useEffect(() => {
-    document.addEventListener('keydown', openForm)
-
+    document.addEventListener("keypress", openForm);
+    document.getElementById("search")?.removeEventListener("keydown", openForm);
     return () => {
-      document.removeEventListener('keydown', openForm)
-    }
-  }, [openForm, savedFormsState])
-
+      document.removeEventListener("keypress", openForm);
+    };
+  }, [openForm, savedFormsState]);
 
   return (
     //This renders form title, edit and delte buttons and a button to create new form
@@ -78,6 +86,7 @@ export default function Home() {
         <input
           type="text"
           name="search"
+          id="search"
           value={searchString}
           placeholder="Search"
           onChange={(e) => setSearchString(e.target.value)}

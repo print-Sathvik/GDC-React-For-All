@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { SetStateAction, useEffect, useState } from "react";
+import { SetStateAction, useCallback, useEffect, useState } from "react";
 import { Submission, formField } from "../types/formTypes";
 import { getFields, getSubmission } from "../utils/apiUtils";
 import FieldSetPrev from "./preview/FieldSetPrev";
@@ -11,6 +11,7 @@ import {
   ArrowLeftCircleIcon,
 } from "@heroicons/react/24/outline";
 import TextAreaPrev from "./preview/TextAreaPrev";
+import Map from "./preview/MapFieldPrev";
 
 const initializeState = async (
   fromId: number,
@@ -54,6 +55,27 @@ export default function Preview(props: {
   useEffect(() => {
     initializeFormFields(props.formId, setFormFields);
   }, []);
+
+  const navForm = useCallback(
+    (e: KeyboardEvent) => {
+      console.log(e.key, formFields?.length, currentFieldIndex);
+      if (e.key === "ArrowRight" || e.key === "Enter") {
+        formFields &&
+          currentFieldIndex < formFields.length &&
+          setCurFieldIndex(currentFieldIndex + 1);
+      } else if (e.key === "ArrowLeft") {
+        currentFieldIndex > 0 && setCurFieldIndex(currentFieldIndex - 1);
+      }
+    },
+    [formFields, currentFieldIndex]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", navForm);
+    return () => {
+      document.removeEventListener("keydown", navForm);
+    };
+  }, [navForm, state]);
 
   if (state === null) {
     return <div className="text-center">No submission exists at this URL</div>;
@@ -112,20 +134,34 @@ export default function Preview(props: {
         );
       case "RADIO":
         return (
-          currentField.kind === "RADIO" && (
-            <RadioGroupPrev
-              id={currentField.id}
-              key={currentField.id}
-              label={currentField.label}
-              value={
-                state.answers.find(
-                  (answer) => answer.form_field === currentField.id
-                )?.value ?? ""
-              }
-              options={currentField.options}
-            />
-          )
+          <RadioGroupPrev
+            id={currentField.id}
+            key={currentField.id}
+            label={currentField.label}
+            value={
+              state.answers.find(
+                (answer) => answer.form_field === currentField.id
+              )?.value ?? ""
+            }
+            options={currentField.options}
+          />
         );
+      case "GENERIC":
+        switch (currentField.meta.description) {
+          case "address":
+            return (
+              <Map
+                id={currentField.id}
+                key={currentField.id}
+                label={currentField.label}
+                value={
+                  state?.answers.find(
+                    (answer) => answer.form_field === currentField.id
+                  )?.value || ""
+                }
+              />
+            );
+        }
     }
   };
 

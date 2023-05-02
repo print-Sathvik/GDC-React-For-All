@@ -1,5 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { SetStateAction, useEffect, useReducer, useState } from "react";
+import {
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 import { SubmitAction } from "../types/actionTypes";
 import { Submission, formData, formField } from "../types/formTypes";
 import { getFields, getFormData, postSubmission } from "../utils/apiUtils";
@@ -13,6 +19,7 @@ import {
   ArrowRightCircleIcon,
   ArrowLeftCircleIcon,
 } from "@heroicons/react/24/outline";
+import Map from "./preview/MapFieldPrev";
 
 const initializeFormFields = async (
   formId: number,
@@ -150,6 +157,42 @@ export default function NewSubmission(props: { formId: number }) {
     initializeFormFields(props.formId, setFormFields);
   }, []);
 
+  const navForm = useCallback(
+    (e: KeyboardEvent) => {
+      switch (e.key) {
+        case "ArrowRight":
+          formFields &&
+            currentFieldIndex < formFields.length &&
+            setCurFieldIndex(currentFieldIndex + 1);
+          break;
+        case "ArrowLeft":
+          currentFieldIndex > 0 && setCurFieldIndex(currentFieldIndex - 1);
+          break;
+        case "Enter":
+          formFields &&
+            currentFieldIndex < formFields.length &&
+            setCurFieldIndex(currentFieldIndex + 1);
+          formFields &&
+            state &&
+            currentFieldIndex === formFields.length &&
+            saveSubmission(props.formId, state)
+              .then(() => navigate(`/submissions/${props.formId}`))
+              .catch(() => navigate(`/submissions/${props.formId}`));
+          break;
+        case "Escape":
+          navigate(`/submissions/${props.formId}`);
+      }
+    },
+    [formFields, currentFieldIndex]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", navForm);
+    return () => {
+      document.removeEventListener("keydown", navForm);
+    };
+  }, [navForm, state]);
+
   const renderField = (currentField: formField) => {
     if (currentField === null) return currentField;
     switch (currentField.kind) {
@@ -192,26 +235,24 @@ export default function NewSubmission(props: { formId: number }) {
         );
       case "DROPDOWN":
         return currentField.meta.description === "SINGLE" ? (
-          currentField.kind === "DROPDOWN" && (
-            <DropDownPrev
-              id={currentField.id}
-              key={currentField.id}
-              label={currentField.label}
-              value={
-                state?.answers.find(
-                  (answer) => answer.form_field === currentField.id
-                )?.value || ""
-              }
-              options={currentField.options}
-              setFieldContentCB={(id, content) => {
-                dispatch({
-                  type: "update_answer",
-                  field_id: id,
-                  answer: content,
-                });
-              }}
-            />
-          )
+          <DropDownPrev
+            id={currentField.id}
+            key={currentField.id}
+            label={currentField.label}
+            value={
+              state?.answers.find(
+                (answer) => answer.form_field === currentField.id
+              )?.value || ""
+            }
+            options={currentField.options}
+            setFieldContentCB={(id, content) => {
+              dispatch({
+                type: "update_answer",
+                field_id: id,
+                answer: content,
+              });
+            }}
+          />
         ) : (
           <MultiSelectPrev
             id={currentField.id}
@@ -234,32 +275,56 @@ export default function NewSubmission(props: { formId: number }) {
         );
       case "RADIO":
         return (
-          currentField.kind === "RADIO" && (
-            <RadioGroupPrev
-              id={currentField.id}
-              key={currentField.id}
-              label={currentField.label}
-              value={
-                state?.answers.find(
-                  (answer) => answer.form_field === currentField.id
-                )?.value || ""
-              }
-              options={currentField.options}
-              setFieldContentCB={(id, content) => {
-                dispatch({
-                  type: "update_answer",
-                  field_id: id,
-                  answer: content,
-                });
-              }}
-            />
-          )
+          <RadioGroupPrev
+            id={currentField.id}
+            key={currentField.id}
+            label={currentField.label}
+            value={
+              state?.answers.find(
+                (answer) => answer.form_field === currentField.id
+              )?.value || ""
+            }
+            options={currentField.options}
+            setFieldContentCB={(id, content) => {
+              dispatch({
+                type: "update_answer",
+                field_id: id,
+                answer: content,
+              });
+            }}
+          />
         );
+      case "GENERIC":
+        switch (currentField.meta.description) {
+          case "address":
+            return (
+              <Map
+                id={currentField.id}
+                key={currentField.id}
+                label={currentField.label}
+                value={
+                  state?.answers.find(
+                    (answer) => answer.form_field === currentField.id
+                  )?.value || ""
+                }
+                setFieldContentCB={(id, content) => {
+                  dispatch({
+                    type: "update_answer",
+                    field_id: id,
+                    answer: content,
+                  });
+                  console.log(state);
+                }}
+              />
+            );
+        }
     }
   };
 
   if (formFields === null) {
     return <div className="text-center">Fetching form ....</div>;
+  } else if (formFields.length === 0) {
+    return <div className="text-center">There are no fields in this form</div>;
   } else {
     return (
       <div>
@@ -269,7 +334,7 @@ export default function NewSubmission(props: { formId: number }) {
             formFields && renderField(formFields[currentFieldIndex])
           ) : (
             <div className="text-center p-2 my-4">
-              You have reached the end of this form
+              You have reached the end of this form. Press Enter to Submit
             </div>
           )}
         </div>
@@ -292,17 +357,17 @@ export default function NewSubmission(props: { formId: number }) {
           )}
         </div>
         <div className="text-center">
-        <button
-          className="bg-blue-600 hover:bg-blue-800 rounded p-2 text-white font-bold"
-          onClick={(_) => {
-            state &&
-              saveSubmission(props.formId, state)
-                .then(() => navigate(`/submissions/${props.formId}`))
-                .catch(() => navigate(`/submissions/${props.formId}`));
-          }}
-        >
-          Submit
-        </button>
+          <button
+            className="bg-blue-600 hover:bg-blue-800 rounded p-2 text-white font-bold"
+            onClick={(_) => {
+              state &&
+                saveSubmission(props.formId, state)
+                  .then(() => navigate(`/submissions/${props.formId}`))
+                  .catch(() => navigate(`/submissions/${props.formId}`));
+            }}
+          >
+            Submit
+          </button>
         </div>
       </div>
     );

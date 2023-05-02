@@ -39,7 +39,8 @@ type textFieldType =
   | "tel"
   | "url"
   | "password"
-  | "textarea";
+  | "textarea"
+  | "address";
 
 type TextField = {
   kind: "TEXT";
@@ -56,7 +57,8 @@ type TextField = {
       | "email"
       | "url"
       | "time"
-      | "date";
+      | "date"
+      | "address";
   };
 };
 
@@ -87,7 +89,21 @@ type MultiSelect = {
   meta: { description: "MULTIPLE" };
 };
 
-type formField = TextField | DropdownField | RadioGroup | MultiSelect;
+type MapField = {
+  kind: "GENERIC";
+  id: number;
+  label: string;
+  options: string[];
+  value: string;
+  meta: { description: "address" };
+};
+
+type formField =
+  | TextField
+  | DropdownField
+  | RadioGroup
+  | MultiSelect
+  | MapField;
 
 type newFieldType = { label: string; type: textFieldType };
 

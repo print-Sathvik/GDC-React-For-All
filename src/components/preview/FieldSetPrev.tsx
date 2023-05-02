@@ -13,7 +13,8 @@ export default function FieldSetPrev(props: {
       | "email"
       | "url"
       | "time"
-      | "date";
+      | "date"
+      | "address";
   };
   setFieldContentCB?: (id: number, content: string) => void;
 }) {

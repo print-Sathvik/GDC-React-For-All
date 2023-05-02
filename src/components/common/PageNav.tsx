@@ -32,24 +32,32 @@ export default function PageNav(props: {
     initializeFormsCount(setCount);
   }, []);
 
-  const navForm = useCallback((e: { key: any; }) => {
-    if(e.key === 'ArrowRight') {
-      props.offSet + props.limit < count && props.setOffsetCB(props.offSet + LIMIT)
-      if (props.offSet >= props.limit * 2 && start <= Math.ceil(count / props.limit) - 3) setStart(start + 1)
-    } else if (e.key === 'ArrowLeft') {
-      props.offSet>0 && props.setOffsetCB(props.offSet - LIMIT)
-      if (props.offSet >= start && start > 1) setStart(start - 1);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, props])
+  const navForm = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") {
+        props.offSet + props.limit < count &&
+          props.setOffsetCB(props.offSet + LIMIT);
+        if (
+          props.offSet >= props.limit * 2 &&
+          start <= Math.ceil(count / props.limit) - 3
+        )
+          setStart(start + 1);
+      } else if (e.key === "ArrowLeft") {
+        props.offSet > 0 && props.setOffsetCB(props.offSet - LIMIT);
+        if (props.offSet >= start && start > 1) setStart(start - 1);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [count, props]
+  );
 
   useEffect(() => {
-    document.addEventListener('keydown', navForm)
+    document.addEventListener("keydown", navForm);
 
     return () => {
-      document.removeEventListener('keydown', navForm)
-    }
-  }, [navForm])
+      document.removeEventListener("keydown", navForm);
+    };
+  }, [navForm]);
 
   const renderPgNo = () => {
     let allPageNos = [];

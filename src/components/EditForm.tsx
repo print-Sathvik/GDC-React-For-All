@@ -2,20 +2,27 @@ import React, { useState } from "react";
 import { Errors, Form, formData, validateForm } from "../types/formTypes";
 import { patchFormData } from "../utils/apiUtils";
 
-const saveFormData = async (form: formData, ) => {
+const saveFormData = async (form: formData) => {
   try {
     await patchFormData(form.id ?? 0, {
       title: form.title,
       description: form.description ?? "",
       is_public: form.is_public ?? false,
     });
-
   } catch (error) {
     console.log(error);
   }
 };
 
-export default function EditForm(props: {closeCB: () => void, form: formData, setFormStateCB: (title: string, description: string, is_public: boolean)=>void}) {
+export default function EditForm(props: {
+  closeCB: () => void;
+  form: formData;
+  setFormStateCB: (
+    title: string,
+    description: string,
+    is_public: boolean
+  ) => void;
+}) {
   const [form, setForm] = useState<formData>({
     id: props.form.id,
     title: props.form.title,
@@ -38,7 +45,11 @@ export default function EditForm(props: {closeCB: () => void, form: formData, se
     if (Object.keys(validationErrors).length === 0) {
       try {
         await saveFormData(form);
-        props.setFormStateCB(form.title, form.description ?? "", form.is_public)
+        props.setFormStateCB(
+          form.title,
+          form.description ?? "",
+          form.is_public
+        );
         props.closeCB();
       } catch (error) {
         console.log(error);
@@ -118,9 +129,13 @@ export default function EditForm(props: {closeCB: () => void, form: formData, se
         >
           Update
         </button>
-        <button type="button"
-        onClick={props.closeCB}
-        className="m-3 inline-flex float-right w-full justify-center rounded bg-white px-3 py-2 font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancel</button>
+        <button
+          type="button"
+          onClick={props.closeCB}
+          className="m-3 inline-flex float-right w-full justify-center rounded bg-white px-3 py-2 font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+        >
+          Cancel
+        </button>
       </form>
     </div>
   );

@@ -144,6 +144,15 @@ const getNewFormFields: (type: textFieldType, label: string) => formField = (
         value: "",
         meta: { description: "MULTIPLE" },
       };
+    case "address":
+      return {
+        kind: "GENERIC",
+        id: Number(new Date()),
+        label: label,
+        options: [],
+        value: "",
+        meta: { description: "address" },
+      };
   }
 };
 
@@ -168,7 +177,12 @@ const reducer: (
 
   switch (action.type) {
     case "update_title":
-      return { ...state, title: action.title, description: action.description, is_public: action.is_public };
+      return {
+        ...state,
+        title: action.title,
+        description: action.description,
+        is_public: action.is_public,
+      };
     default:
       return state;
   }
@@ -190,6 +204,7 @@ const fieldsReducer: (
       addField(action.form_id, newFormField)
         .then((fieldId) => (newFormField.id = fieldId))
         .catch((error) => {
+          console.log(error);
           return fieldsState;
         });
       return [...fieldsState, newFormField];
@@ -253,7 +268,7 @@ const fieldsReducer: (
 function Form(props: { id: number }) {
   const [state, dispatchForm] = useReducer(reducer, null);
   const [fieldsState, dispatchFields] = useReducer(fieldsReducer, []);
-  const [edit, setEdit] = useState<boolean>(false)
+  const [edit, setEdit] = useState<boolean>(false);
   const defaultNewField: newFieldType = {
     label: "",
     type: "text",
@@ -263,9 +278,9 @@ function Form(props: { id: number }) {
   //Elements like deopdown, radio button group, multiselect, can be expanded to see/edit options while creating form
   //Only 1 element can be expanded
   const [expandedElement, setExpandedElement] = useState(0);
-  const [currentFocus, setCurrentFocus] = useState<number>(0)
+  const [currentFocus, setCurrentFocus] = useState<number>(0);
   //currentFocus will save the index of field which is currently focussed(1st field by default)
-  //so that focus can be changed based on keyboard events to navigate the fields
+  //so that focus can be changed based on keyboard events to navigate the form fields
 
   useEffect(() => {
     me().then((currentUser) => {
@@ -288,40 +303,70 @@ function Form(props: { id: number }) {
     };
   }, [fieldsState]);
 
-  const changeFocus = useCallback((e: { key: any; }) => {
-    console.log(e.key, fieldsState.length)
-    if(e.key === 'ArrowUp' && currentFocus > 0) setCurrentFocus(currentFocus => currentFocus - 1)
-    else if(e.key === 'ArrowDown' && currentFocus < fieldsState.length-1) setCurrentFocus(currentFocus => currentFocus + 1)
-  }, [fieldsState, currentFocus])
+  const changeFocus = useCallback(
+    (e: KeyboardEvent) => {
+      console.log(e.key, fieldsState.length);
+      if (e.key === "ArrowUp" && currentFocus > 0)
+        setCurrentFocus((currentFocus) => currentFocus - 1);
+      else if (
+        (e.key === "ArrowDown" || e.key === "Enter") &&
+        currentFocus < fieldsState.length - 1
+      )
+        setCurrentFocus((currentFocus) => currentFocus + 1);
+      else if (e.key === "Escape") navigate("/");
+    },
+    [fieldsState, currentFocus]
+  );
 
   useEffect(() => {
-    document.addEventListener('keyup', changeFocus)
+    document.addEventListener("keydown", changeFocus);
     return () => {
-      document.removeEventListener('keyup', changeFocus)
-    }
-  }, [fieldsState, currentFocus])
+      document.removeEventListener("keydown", changeFocus);
+    };
+  }, [fieldsState, currentFocus]);
 
   const showOptions: (id: number) => void = (id) => {
     //If same element is clicked close it if its open, if different element is clicked, then open that element
     id === expandedElement ? setExpandedElement(0) : setExpandedElement(id);
   };
 
-  console.log(currentFocus)
   return (
     <div className="flex flex-col gap-2 p-4 pt-0 divide-y-2 divide-dotted">
       <div>
         <div className="inputSet relative w-full mt-2 items-center justify-center flex">
-          <h2
-            className="relative font-semibold px-2.5 flex-none"
-          >{state ? state.title : ""}</h2>
-          <PencilSquareIcon onClick={() => setEdit(true)} className="w-5 h-5 flex-none cursor-pointer" color="blue" />
+          <h2 className="relative font-semibold px-2.5 flex-none">
+            {state ? state.title : ""}
+          </h2>
+          <PencilSquareIcon
+            onClick={() => setEdit(true)}
+            className="w-5 h-5 flex-none cursor-pointer"
+            color="blue"
+          />
         </div>
-        {state && <Modal open={edit} closeCB={() => setEdit(false)}>
-          <EditForm closeCB={() => setEdit(false)} form={state} setFormStateCB={(title: string, description: string, is_public: boolean) => {dispatchForm({type: "update_title", title:title, description:description, is_public:is_public})}} />
-        </Modal>}
+        {state && (
+          <Modal open={edit} closeCB={() => setEdit(false)}>
+            <EditForm
+              closeCB={() => setEdit(false)}
+              form={state}
+              setFormStateCB={(
+                title: string,
+                description: string,
+                is_public: boolean
+              ) => {
+                dispatchForm({
+                  type: "update_title",
+                  title: title,
+                  description: description,
+                  is_public: is_public,
+                });
+              }}
+            />
+          </Modal>
+        )}
         {fieldsState.map((field) => {
           switch (field.kind) {
             case "TEXT":
+            case "GENERIC":
               return field.meta.description !== "textarea" ? (
                 <FieldSet
                   id={field.id}
@@ -636,6 +681,7 @@ function Form(props: { id: number }) {
             "radio",
             "multiselect",
             "textarea",
+            "address",
             "password",
             "tel",
             "url",
@@ -665,7 +711,7 @@ function Form(props: { id: number }) {
       <div className="text-center">
         <button
           onClick={(_e) => {
-            saveFields(props.id, fieldsState)
+            saveFields(props.id, fieldsState);
           }}
           className="bg-blue-600 hover:bg-blue-800 text-white font-bold px-3 py-2 mt-4 mr-2 rounded"
         >
@@ -675,7 +721,7 @@ function Form(props: { id: number }) {
           href="/"
           className="bg-red-600 hover:bg-red-800 text-white font-bold p-2 mt-4 mx-2 rounded"
         >
-          Close Form
+          Close
         </Link>
       </div>
     </div>
