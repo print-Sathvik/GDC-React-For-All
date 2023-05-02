@@ -17,13 +17,13 @@ import {
   deleteFieldreq,
   getFields,
   getFormData,
-  me,
   patchField,
   postField,
 } from "../utils/apiUtils";
 import { TrashIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import Modal from "./common/Modal";
 import EditForm from "./EditForm";
+import { User } from "../types/userTypes";
 
 const initializeState = async (
   form_id: number,
@@ -265,7 +265,7 @@ const fieldsReducer: (
   }
 };
 
-function Form(props: { id: number }) {
+function Form(props: { id: number; currentUser: User }) {
   const [state, dispatchForm] = useReducer(reducer, null);
   const [fieldsState, dispatchFields] = useReducer(fieldsReducer, []);
   const [edit, setEdit] = useState<boolean>(false);
@@ -281,12 +281,6 @@ function Form(props: { id: number }) {
   const [currentFocus, setCurrentFocus] = useState<number>(0);
   //currentFocus will save the index of field which is currently focussed(1st field by default)
   //so that focus can be changed based on keyboard events to navigate the form fields
-
-  useEffect(() => {
-    me().then((currentUser) => {
-      if (currentUser.username.length === 0) navigate("/");
-    });
-  }, []);
 
   useEffect(() => {
     initializeState(props.id, dispatchForm);
@@ -329,6 +323,9 @@ function Form(props: { id: number }) {
     //If same element is clicked close it if its open, if different element is clicked, then open that element
     id === expandedElement ? setExpandedElement(0) : setExpandedElement(id);
   };
+
+  if (props.currentUser?.username === "" || props.currentUser === null)
+    return <p className="p-4">Please login to create/view forms</p>;
 
   return (
     <div className="flex flex-col gap-2 p-4 pt-0 divide-y-2 divide-dotted">
@@ -644,7 +641,7 @@ function Form(props: { id: number }) {
                 </div>
               );
             default:
-              return <div>No such field exists</div>;
+              return <div key="nofield">No such field exists</div>;
           }
         })}
       </div>
