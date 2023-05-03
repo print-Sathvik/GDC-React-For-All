@@ -1,3 +1,5 @@
-type User = any;
+type User = {username: string, name: string, url: string};
 
-export type { User };
+type LoginData = {username: string, password: string}
+
+export type { User, LoginData };

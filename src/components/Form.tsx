@@ -257,7 +257,7 @@ const fieldsReducer: (
   }
 };
 
-function Form(props: { id: number; currentUser: User }) {
+function Form(props: { id: number; currentUser: User | null }) {
   const [state, dispatchForm] = useReducer(reducer, null);
   const [fieldsState, dispatchFields] = useReducer(fieldsReducer, []);
   const [edit, setEdit] = useState<boolean>(false);

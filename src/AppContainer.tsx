@@ -3,7 +3,7 @@ import Header from "./Header";
 import { User } from "./types/userTypes";
 
 export default function AppContainer(props: {
-  currentUser: User;
+  currentUser: User | null;
   children: React.ReactNode;
 }) {
   return (

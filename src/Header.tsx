@@ -3,7 +3,7 @@ import logo from "./logo.svg";
 import { ActiveLink } from "raviger";
 import { User } from "./types/userTypes";
 
-export default function Header(props: { currentUser: User }) {
+export default function Header(props: { currentUser: User | null }) {
   return (
     <div className="flex gap-2 items-center w-[500px]">
       <img
@@ -16,7 +16,7 @@ export default function Header(props: { currentUser: User }) {
         {[
           { page: "Home", url: "/" },
           { page: "About", url: "/about" },
-          ...(props.currentUser?.username?.length > 0
+          ...(props.currentUser && props.currentUser.username.length > 0
             ? [
                 {
                   page: "Logout",

@@ -19,7 +19,7 @@ const getCurrentUser: (
 };
 
 export default function AppRouter() {
-  const [currentUser, setCurrentUser] = useState<User>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   useEffect(() => {
     getCurrentUser(setCurrentUser);
   }, []);
