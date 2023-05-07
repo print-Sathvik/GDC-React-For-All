@@ -37,7 +37,7 @@ const removeForm = async (formId: number) => {
   }
 };
 
-export default function Home(props: { currentUser: User }) {
+export default function Home(props: { currentUser: User | null }) {
   const [savedFormsState, setFormsState] = useState<Form[] | null>(null);
   const [{ search }, setQuery] = useQueryParams();
   const [searchString, setSearchString] = useState("");
