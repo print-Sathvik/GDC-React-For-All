@@ -67,12 +67,12 @@ export default function Home(props: { currentUser: User | null }) {
   );
 
   useEffect(() => {
-    if(inputActive) document.removeEventListener("keypress", openForm);
+    if(inputActive || newForm) document.removeEventListener("keypress", openForm);
     else document.addEventListener("keypress", openForm);
     return () => {
       document.removeEventListener("keypress", openForm);
     };
-  }, [openForm, savedFormsState, inputActive]);
+  }, [openForm, savedFormsState, inputActive, newForm]);
 
   if (props.currentUser?.username === "" || props.currentUser === null)
     return <p className="p-4">Please login to create/view forms</p>;
