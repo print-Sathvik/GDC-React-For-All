@@ -44,6 +44,7 @@ export default function Home(props: { currentUser: User | null }) {
   const [newForm, setNewForm] = useState(false);
   const [offset, setOffset] = useState<number>(0);
   const [count, setCount] = useState<number>(0);
+  const [inputActive, setInputActive] = useState<boolean>(false)
 
   useEffect(() => {
     fetchForms(offset, setFormsState, setCount);
@@ -66,12 +67,12 @@ export default function Home(props: { currentUser: User | null }) {
   );
 
   useEffect(() => {
-    document.addEventListener("keypress", openForm);
-    document.getElementById("search")?.removeEventListener("keydown", openForm);
+    if(inputActive) document.removeEventListener("keypress", openForm);
+    else document.addEventListener("keypress", openForm);
     return () => {
       document.removeEventListener("keypress", openForm);
     };
-  }, [openForm, savedFormsState]);
+  }, [openForm, savedFormsState, inputActive]);
 
   if (props.currentUser?.username === "" || props.currentUser === null)
     return <p className="p-4">Please login to create/view forms</p>;
@@ -92,6 +93,8 @@ export default function Home(props: { currentUser: User | null }) {
           value={searchString}
           placeholder="Search"
           onChange={(e) => setSearchString(e.target.value)}
+          onFocus={_ => setInputActive(true)}
+          onBlur={_ => setInputActive(false)}
           className="border-2 border-gray-400 rounded p-2 my-2 w-full flex-1"
         />
       </form>
