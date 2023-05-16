@@ -44,7 +44,7 @@ export default function Home(props: { currentUser: User | null }) {
   const [newForm, setNewForm] = useState(false);
   const [offset, setOffset] = useState<number>(0);
   const [count, setCount] = useState<number>(0);
-  const [inputActive, setInputActive] = useState<boolean>(false)
+  const [inputActive, setInputActive] = useState<boolean>(false);
 
   useEffect(() => {
     fetchForms(offset, setFormsState, setCount);
@@ -52,7 +52,6 @@ export default function Home(props: { currentUser: User | null }) {
 
   const openForm = useCallback(
     (e: KeyboardEvent) => {
-      console.log(e.key);
       if (
         "123456789".includes(e.key) &&
         savedFormsState !== null &&
@@ -67,7 +66,8 @@ export default function Home(props: { currentUser: User | null }) {
   );
 
   useEffect(() => {
-    if(inputActive || newForm) document.removeEventListener("keypress", openForm);
+    if (inputActive || newForm)
+      document.removeEventListener("keypress", openForm);
     else document.addEventListener("keypress", openForm);
     return () => {
       document.removeEventListener("keypress", openForm);
@@ -93,8 +93,8 @@ export default function Home(props: { currentUser: User | null }) {
           value={searchString}
           placeholder="Search"
           onChange={(e) => setSearchString(e.target.value)}
-          onFocus={_ => setInputActive(true)}
-          onBlur={_ => setInputActive(false)}
+          onFocus={(_) => setInputActive(true)}
+          onBlur={(_) => setInputActive(false)}
           className="border-2 border-gray-400 rounded p-2 my-2 w-full flex-1"
         />
       </form>

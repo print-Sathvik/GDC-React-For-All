@@ -313,7 +313,6 @@ export default function NewSubmission(props: { formId: number }) {
                     field_id: id,
                     answer: content,
                   });
-                  console.log(state);
                 }}
               />
             );

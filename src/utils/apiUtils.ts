@@ -10,7 +10,13 @@ type RequestMethod = "GET" | "POST" | "PATCH" | "DELETE" | "PUT";
 export const request = async (
   endpoint: string,
   method: RequestMethod = "GET",
-  data: formData | LoginData | formField | PaginationParams | Submission | {} = {}
+  data:
+    | formData
+    | LoginData
+    | formField
+    | PaginationParams
+    | Submission
+    | {} = {}
 ) => {
   let url;
   let payload: string;

@@ -58,7 +58,6 @@ export default function Preview(props: {
 
   const navForm = useCallback(
     (e: KeyboardEvent) => {
-      console.log(e.key, formFields?.length, currentFieldIndex);
       if (e.key === "ArrowRight" || e.key === "Enter") {
         formFields &&
           currentFieldIndex < formFields.length &&

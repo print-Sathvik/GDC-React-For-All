@@ -299,7 +299,6 @@ function Form(props: { id: number; currentUser: User | null }) {
 
   const changeFocus = useCallback(
     (e: KeyboardEvent) => {
-      console.log(e.key, fieldsState.length);
       if (e.key === "ArrowUp" && currentFocus > 0)
         setCurrentFocus((currentFocus) => currentFocus - 1);
       else if (
